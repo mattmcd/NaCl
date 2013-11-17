@@ -5,6 +5,9 @@ CounterModule = null;
 statusText = 'NO-STATUS';
 
 function pageDidLoad() {
+  var listener = document.getElementById("listener");
+  listener.addEventListener('load', moduleDidLoad, true );
+  listener.addEventListener('message', handleMessage, true );
   if ( CounterModule == null ) {
     updateStatus( 'LOADING...' );
   } else {
@@ -20,13 +23,7 @@ function moduleDidLoad() {
   inc.disabled = false;
 }
 
-function callNaCl() {
-  console.log( "Calling NaCl" );
-  CounterModule.postMessage(1); 
-}
-
 function handleMessage(message_event) {
-  console.log( "Received message from NaCl");
   updateStatus(message_event.data);
 }
 
