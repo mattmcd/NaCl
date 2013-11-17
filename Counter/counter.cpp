@@ -1,11 +1,7 @@
 #include "counter.hpp"
 
 pp::Module* pp::CreateModule() {
-  return new CounterModule();
-}
-
-pp::Instance* CounterModule::CreateInstance( PP_Instance instance ) {
-  return new CounterInstance( instance );
+  return new InstanceFactory<CounterInstance>();
 }
 
 void CounterInstance::HandleMessage( const pp::Var& var_message ) {

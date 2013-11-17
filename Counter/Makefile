@@ -31,7 +31,7 @@ all: counter.pexe
 clean:
 	$(RM) counter.pexe counter.bc
 
-counter.bc: counter.cpp counter.hpp
+counter.bc: counter.cpp counter.hpp instance_factory.hpp
 	$(PNACL_CXX) -o $@ $< -O2 $(CXXFLAGS) $(LDFLAGS)
 
 counter.pexe: counter.bc
