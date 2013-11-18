@@ -4,7 +4,7 @@ pp::Module* pp::CreateModule() {
   return new InstanceFactory<MonteCarloInstance>();
 }
 
-void CounterInstance::HandleMessage( const pp::Var& var_message ) {
+void MonteCarloInstance::HandleMessage( const pp::Var& var_message ) {
   if ( !var_message.is_number() )
     return; //Early exit
   auto n = var_message.AsInt();

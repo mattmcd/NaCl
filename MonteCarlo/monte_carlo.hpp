@@ -19,7 +19,6 @@ class MonteCarlo {
     result sim( std::function<int(double,double)> const& f) {
       // Bind the generator to the first argument of distribution so that
       // we can call with rng() instead of dist(gen).
-      std::mt19937 generator;
       std::uniform_real_distribution<double> unifdist(0.0, 1.0);
       auto rng = std::bind( unifdist, generator );
       
@@ -39,6 +38,7 @@ class MonteCarlo {
     }
   private:
     len_t N;
+    std::mt19937 generator;
 
 };
 

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Monte Carlo simulation</title>
+  <script type="text/javascript" src="mcView.js"></script>
+</head>
+<body onLoad="pageDidLoad()">
+  <h1>Monte Carlo simulation using NaCl</h1>
+
+  <div id="listener">
+    <!-- Embed the NaCl -->
+    <embed id="monte_carlo" width=0 height=0 src="monte_carlo.nmf"
+           type="application/x-pnacl"/>
+  </div>
+
+  <h2>Status <code id="statusField">NO-STATUS</code></h2>
+  <input type="number" id="nPts" value="100" disabled></input> 
+  <button id="go" disabled>Go!</button>
+</body>
+</html>

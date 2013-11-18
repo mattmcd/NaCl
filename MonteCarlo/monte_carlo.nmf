@@ -1,0 +1,8 @@
+{ "program" : 
+  { "portable" : 
+    { "pnacl-translate" : 
+      { "url" : "monte_carlo.pexe"
+      } 
+    }
+  }
+}

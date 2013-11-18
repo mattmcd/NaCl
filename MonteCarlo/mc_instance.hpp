@@ -8,7 +8,7 @@
 class MonteCarloInstance : public pp::Instance {
   public:
     explicit MonteCarloInstance( PP_Instance instance ) 
-      : pp::Instance(instance), N(100) {};
+      : pp::Instance(instance), N(100) { };
     virtual ~MonteCarloInstance( ){};
     virtual void HandleMessage( const pp::Var& );
   private:
