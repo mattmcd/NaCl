@@ -34,7 +34,7 @@ test_mc: monte_carlo.hpp test_mc.cpp
 clean:
 	$(RM) monte_carlo.pexe monte_carlo.bc
 
-monte_carlo.bc: monte_carlo.cpp monte_carlo.hpp instance_factory.hpp
+monte_carlo.bc: monte_carlo.cpp monte_carlo.hpp instance_factory.hpp mc_instance.hpp
 	$(PNACL_CXX) -o $@ $< -O2 $(CXXFLAGS) $(LDFLAGS)
 
 monte_carlo.pexe: monte_carlo.bc

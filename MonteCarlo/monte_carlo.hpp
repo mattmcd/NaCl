@@ -16,7 +16,7 @@ class MonteCarlo {
     explicit MonteCarlo(len_t nPts_) : N(nPts_) {
     };
     virtual ~MonteCarlo() {};
-    result sim( std::function<int(double,double)> f) {
+    result sim( std::function<int(double,double)> const& f) {
       // Bind the generator to the first argument of distribution so that
       // we can call with rng() instead of dist(gen).
       std::mt19937 generator;
@@ -33,6 +33,10 @@ class MonteCarlo {
       res.Mean = (1.0*sum)/N;
       return res;
     };
+    result sim() {
+      auto f = [](double x, double y){ return x*x + y*y < 1 ? 1 : 0; };
+      return sim(f);
+    }
   private:
     len_t N;
 
