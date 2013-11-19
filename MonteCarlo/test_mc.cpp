@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
   const long int nPts = 1e4;
   auto res = mc.sim( f, nPts );
 
-  std::cout << res.Mean << " +/- " << res.StDev << std::endl;
+  std::cout << res.Mean << " +/- " << res.StDev/res.Mean/nPts << std::endl;
 
   return 0;
 }
