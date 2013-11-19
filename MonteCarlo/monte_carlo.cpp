@@ -7,11 +7,9 @@ pp::Module* pp::CreateModule() {
 void MonteCarloInstance::HandleMessage( const pp::Var& var_message ) {
   if ( !var_message.is_number() )
     return; //Early exit
-  auto n = var_message.AsInt();
-  N = n;
-  // Create the simulation engine
-  MonteCarlo mc(N);
-  auto res = mc.sim();
+  auto N = var_message.AsInt();
+  // Run the simulation 
+  auto res = mc.sim(N);
   const pp::Var reply( res.Mean );
   PostMessage( reply );
 }

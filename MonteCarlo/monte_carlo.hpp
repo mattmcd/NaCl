@@ -13,13 +13,12 @@ typedef long unsigned int len_t;
 
 class MonteCarlo {
   public:
-    explicit MonteCarlo(len_t nPts_) : N(nPts_) {
+    explicit MonteCarlo() : unifdist(0.0,1.0) {
     };
     virtual ~MonteCarlo() {};
-    result sim( std::function<int(double,double)> const& f) {
+    result sim( std::function<int(double,double)> const& f, len_t N) {
       // Bind the generator to the first argument of distribution so that
       // we can call with rng() instead of dist(gen).
-      std::uniform_real_distribution<double> unifdist(0.0, 1.0);
       auto rng = std::bind( unifdist, generator );
       
       len_t sum = 0;
@@ -32,14 +31,14 @@ class MonteCarlo {
       res.Mean = (1.0*sum)/N;
       return res;
     };
-    result sim() {
+    result sim(len_t N) {
       auto f = [](double x, double y){ return x*x + y*y < 1 ? 1 : 0; };
-      return sim(f);
+      return sim(f,N);
     }
   private:
-    len_t N;
     std::mt19937 generator;
-
+    std::uniform_real_distribution<double> unifdist;
+    
 };
 
 #endif
