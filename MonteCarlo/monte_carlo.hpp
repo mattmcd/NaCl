@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <random>
+#include <cmath>
 
 struct result {
   double Mean;
@@ -29,6 +30,7 @@ class MonteCarlo {
       }
       result res;
       res.Mean = (1.0*sum)/N;
+      res.StDev = sqrt( res.Mean*(1.0 - res.Mean) );
       return res;
     };
     result sim(len_t N) {
