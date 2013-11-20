@@ -37,8 +37,10 @@ function moduleDidLoad() {
 function handleMessage(message_event) {
   console.log( "Received " + message_event.data );
   var tDiff = Date.now() - lastClick;
-  updateStatus( "Received: " + message_event.data.toFixed(7) 
-    + " after " + tDiff + "ms" + " for " + nPtsSim + " points" );
+  var res = message_event.data;
+  updateStatus( "Received: " + res.Mean.toFixed(7) 
+    + " +/- " + res.StdError.toFixed(7) 
+    +  " after " + tDiff + "ms" + " for " + nPtsSim + " points" );
   var go = document.getElementById( 'go' );
   go.disabled = false;
 }

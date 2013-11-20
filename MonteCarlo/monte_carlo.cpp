@@ -1,4 +1,5 @@
 #include "mc_instance.hpp"
+#include "ppapi/cpp/var_dictionary.h"
 
 pp::Module* pp::CreateModule() {
   return new InstanceFactory<MonteCarloInstance>();
@@ -10,6 +11,8 @@ void MonteCarloInstance::HandleMessage( const pp::Var& var_message ) {
   auto N = var_message.AsInt();
   // Run the simulation 
   auto res = mc.sim(N);
-  const pp::Var reply( res.Mean );
+  pp::VarDictionary reply;
+  reply.Set( "Mean", res.Mean );
+  reply.Set( "StdError", res.StDev/sqrt(N));
   PostMessage( reply );
 }
