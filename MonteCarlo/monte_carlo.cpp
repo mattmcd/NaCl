@@ -11,6 +11,7 @@ void MonteCarloInstance::HandleMessage( const pp::Var& var_message ) {
   if ( !var_message.is_number() )
     return; //Early exit
   auto N = var_message.AsInt();
+  
   // Run the simulation in 10 parts
   const len_t nParts = 10;
   std::vector<len_t> total;
@@ -18,6 +19,7 @@ void MonteCarloInstance::HandleMessage( const pp::Var& var_message ) {
   std::vector<double> mean;
   std::vector<double> stdError;
   auto step = N/nParts;
+  step = step > 0 ? step : 1;
   len_t runningTotal = 0;
   for( len_t i=step; i<=N; i += step) {
     auto res = mc.sim(step);
