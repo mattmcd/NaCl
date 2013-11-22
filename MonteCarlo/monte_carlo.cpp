@@ -7,6 +7,20 @@ pp::Module* pp::CreateModule() {
   return new InstanceFactory<MonteCarloInstance>();
 }
 
+void copyToPPVarArray( const std::vector<double> &src, pp::VarArray &dest ) {
+  dest.SetLength( src.size());
+  for ( unsigned int i=0; i<src.size(); ++i ) {
+    dest.Set( i, src[i]);
+  }
+}
+
+void copyToPPVarArray( const std::vector<len_t> &src, pp::VarArray &dest ) {
+  dest.SetLength( src.size());
+  for ( unsigned int i=0; i<src.size(); ++i ) {
+    dest.Set( i, static_cast<double>(src[i]));
+  }
+}
+
 void MonteCarloInstance::HandleMessage( const pp::Var& var_message ) {
   if ( !var_message.is_number() )
     return; //Early exit
@@ -34,26 +48,15 @@ void MonteCarloInstance::HandleMessage( const pp::Var& var_message ) {
   pp::VarDictionary reply;
   auto finalMean =  mean[ mean.size() -1];
   auto finalStdError =  stdError[ stdError.size() - 1];
+  
   pp::VarArray MeanConverge;
-  MeanConverge.SetLength( mean.size());
-  for ( unsigned int i=0; i<mean.size(); ++i ) {
-    MeanConverge.Set( i, mean[i]);
-  }
+  copyToPPVarArray( mean, MeanConverge );
   pp::VarArray StdErrConverge;
-  StdErrConverge.SetLength( stdError.size());
-  for ( unsigned int i=0; i<stdError.size(); ++i ) {
-    StdErrConverge.Set( i, stdError[i]);
-  }
+  copyToPPVarArray( stdError, StdErrConverge );
   pp::VarArray TotalConverge;
-  TotalConverge.SetLength( total.size());
-  for ( unsigned int i=0; i<stdError.size(); ++i ) {
-    TotalConverge.Set( i, static_cast<double>(total[i]));
-  }
+  copyToPPVarArray( total, TotalConverge );
   pp::VarArray SamplesConverge;
-  SamplesConverge.SetLength( samples.size());
-  for ( unsigned int i=0; i<stdError.size(); ++i ) {
-    SamplesConverge.Set( i, static_cast<double>(samples[i]));
-  }
+  copyToPPVarArray( samples, SamplesConverge );
 
   reply.Set( "Mean", finalMean );
   reply.Set( "StdError", finalStdError );
