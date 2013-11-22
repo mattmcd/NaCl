@@ -5,12 +5,14 @@
 #include <random>
 #include <cmath>
 
+typedef long unsigned int len_t;
+
 struct result {
   double Mean;
   double StDev;
+  len_t Total; // Total number of points 
+  len_t PointCount; // Number that passed
 };
-
-typedef long unsigned int len_t;
 
 class MonteCarlo {
   public:
@@ -20,17 +22,19 @@ class MonteCarlo {
     result sim( std::function<int(double,double)> const& f, len_t N) {
       // Bind the generator to the first argument of distribution so that
       // we can call with rng() instead of dist(gen).
-      auto rng = std::bind( unifdist, generator );
+      // auto rng = std::bind( unifdist, generator );
       
       len_t sum = 0;
       for( len_t i=0; i<N; ++i) {
-        double x = rng();
-        double y = rng();
+        double x = unifdist(generator);
+        double y = unifdist(generator);
         sum += f(x,y);
       }
       result res;
       res.Mean = (1.0*sum)/N;
       res.StDev = sqrt( res.Mean*(1.0 - res.Mean) );
+      res.Total = sum;
+      res.PointCount = N;
       return res;
     };
     result sim(len_t N) {
