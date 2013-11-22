@@ -28,7 +28,7 @@ void MonteCarloInstance::HandleMessage( const pp::Var& var_message ) {
     samples.push_back(i);
     auto runningMean = 1.0*runningTotal/i;
     mean.push_back(runningMean);
-    stdError.push_back(runningMean*(1.0-runningMean)/sqrt(i));
+    stdError.push_back(sqrt( runningMean*(1.0-runningMean) / i));
   }
 
   pp::VarDictionary reply;
