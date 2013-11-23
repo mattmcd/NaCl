@@ -10,8 +10,8 @@ nPtsSim = null;
 
 function pageDidLoad() {
   var listener = document.getElementById("listener");
-  listener.addEventListener('load', moduleDidLoad, true );
-  listener.addEventListener('message', handleMessage, true );
+  listener.addEventListener("load", moduleDidLoad, true );
+  listener.addEventListener("message", handleMessage, true );
   if ( MonteCarloModule == null ) {
     updateStatus( 'LOADING...' );
   } else {
@@ -20,10 +20,10 @@ function pageDidLoad() {
 }
 
 function moduleDidLoad() {
-  MonteCarloModule = document.getElementById( 'monte_carlo' );
-  updateStatus( 'OK' );
-  var go = document.getElementById( 'go' );
-  var nPts = document.getElementById('nPts');
+  MonteCarloModule = document.getElementById( "monte_carlo" );
+  updateStatus( "OK" );
+  var go = document.getElementById( "go" );
+  var nPts = document.getElementById( "nPts" );
   go.onclick = function() {
     go.disabled = true;
     nPtsSim = Number( nPts.value );
@@ -45,9 +45,25 @@ function handleMessage(message_event) {
   console.log( res.SamplesConverge );
   console.log( res.MeanConverge );
   console.log( res.StdErrConverge );
+  updateTable( res );
+  // updatePlot( res );
+  var go = document.getElementById( "go" );
+  go.disabled = false;
+}
+
+function updateStatus( optMessage ) {
+  if (optMessage)
+    statusText = optMessage;
+  var statusField = document.getElementById("statusField");
+  if (statusField) {
+    statusField.innerHTML = statusText;
+  }
+}
+
+function updateTable( res ) {
   // Write convergence table
   var results = document.getElementById( "results" );
-  var tableStr = '<tr><th>Samples</th><th>Total</th><th>Mean</th><th>Std Error</th>';
+  var tableStr = "<tr><th>Samples</th><th>Total</th><th>Mean</th><th>Std Error</th>";
   for ( var iRow = 0; iRow < res.SamplesConverge.length; iRow++ ){
     tableStr += "<tr>";
     tableStr += "<td>" + res.SamplesConverge[iRow] + "</td>";
@@ -57,15 +73,14 @@ function handleMessage(message_event) {
     tableStr += "</tr>";
   }
   results.innerHTML = tableStr;
-  var go = document.getElementById( 'go' );
-  go.disabled = false;
 }
 
-function updateStatus( optMessage ) {
-  if (optMessage)
-    statusText = optMessage;
-  var statusField = document.getElementById('statusField');
-  if (statusField) {
-    statusField.innerHTML = statusText;
-  }
+function updatePlot( res ) {
+  // D3 visualization
+  var table = d3.select("#plot").append("table");
+  var tr = table.selectAll("tr")
+    .data( [res.SamplesConverge, res.TotalConverge] )
+    .enter().append("tr");
+  var td = tr.selectAll("td").data( function (d) { return d; }).enter().append("td");
+  td.text( function (d) { return d; });
 }
