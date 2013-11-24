@@ -42,7 +42,6 @@ function handleMessage(message_event) {
     + " +/- " + res[res.length-1].StdError.toFixed(7) 
     +  " after " + tDiff + "ms" + " for " + nPtsSim + " points" );
   updateTable( res );
-  // updatePlot( res );
   var go = document.getElementById( "go" );
   go.disabled = false;
 }
@@ -57,26 +56,18 @@ function updateStatus( optMessage ) {
 }
 
 function updateTable( res ) {
-  // Write convergence table
-  var results = document.getElementById( "results" );
-  var tableStr = "<tr><th>Samples</th><th>Total</th><th>Mean</th><th>Std Error</th>";
-  for ( var iRow = 0; iRow < res.length; iRow++ ){
-    tableStr += "<tr>";
-    tableStr += "<td>" + res[iRow].Samples+ "</td>";
-    tableStr += "<td>" + res[iRow].Total + "</td>";
-    tableStr += "<td>" + res[iRow].Mean.toFixed(7) + "</td>";
-    tableStr += "<td>" + res[iRow].StdError.toFixed(7) + "</td>";
-    tableStr += "</tr>";
-  }
-  results.innerHTML = tableStr;
-}
-
-function updatePlot( res ) {
   // D3 visualization
-  var table = d3.select("#plot").append("table");
+  d3.select("#results table").remove(); // Remove old data
+  var table = d3.select("#results").append("table");
+  var th = table.selectAll("th")
+    .data(["Samples","Total","Mean","Std Error"])
+    .enter().append("th").text( function (d) { return d; });
   var tr = table.selectAll("tr")
-    .data( [res.SamplesConverge, res.TotalConverge] )
+    .data( res )
     .enter().append("tr");
-  var td = tr.selectAll("td").data( function (d) { return d; }).enter().append("td");
+  var td = tr.selectAll("td")
+    .data( function (d) { 
+      return [d.Samples, d.Total, d.Mean.toFixed(7), d.StdError.toFixed(7)]; })
+    .enter().append("td");
   td.text( function (d) { return d; });
 }
