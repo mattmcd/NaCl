@@ -35,16 +35,12 @@ function moduleDidLoad() {
 }
 
 function handleMessage(message_event) {
-  console.log( "Received " + message_event.data );
+  console.log( "Received " + message_event.data.length + " results" );
   var tDiff = Date.now() - lastClick;
   var res = message_event.data;
-  updateStatus( "Received: " + res.Mean.toFixed(7) 
-    + " +/- " + res.StdError.toFixed(7) 
+  updateStatus( "Received: " + res[res.length-1].Mean.toFixed(7) 
+    + " +/- " + res[res.length-1].StdError.toFixed(7) 
     +  " after " + tDiff + "ms" + " for " + nPtsSim + " points" );
-  console.log( res.TotalConverge );
-  console.log( res.SamplesConverge );
-  console.log( res.MeanConverge );
-  console.log( res.StdErrConverge );
   updateTable( res );
   // updatePlot( res );
   var go = document.getElementById( "go" );
@@ -64,12 +60,12 @@ function updateTable( res ) {
   // Write convergence table
   var results = document.getElementById( "results" );
   var tableStr = "<tr><th>Samples</th><th>Total</th><th>Mean</th><th>Std Error</th>";
-  for ( var iRow = 0; iRow < res.SamplesConverge.length; iRow++ ){
+  for ( var iRow = 0; iRow < res.length; iRow++ ){
     tableStr += "<tr>";
-    tableStr += "<td>" + res.SamplesConverge[iRow] + "</td>";
-    tableStr += "<td>" + res.TotalConverge[iRow] + "</td>";
-    tableStr += "<td>" + res.MeanConverge[iRow].toFixed(7) + "</td>";
-    tableStr += "<td>" + res.StdErrConverge[iRow].toFixed(7) + "</td>";
+    tableStr += "<td>" + res[iRow].Samples+ "</td>";
+    tableStr += "<td>" + res[iRow].Total + "</td>";
+    tableStr += "<td>" + res[iRow].Mean.toFixed(7) + "</td>";
+    tableStr += "<td>" + res[iRow].StdError.toFixed(7) + "</td>";
     tableStr += "</tr>";
   }
   results.innerHTML = tableStr;
