@@ -30,6 +30,7 @@ void MonteCarloInstance::HandleMessage( const pp::Var& var_message ) {
     outData.Set( "Mean", runningMean );
     outData.Set( "StdError", sqrt( runningMean*(1.0-runningMean)/i));
     reply.Set( count, outData );
+    PostMessage( outData ); // For progress measurement
     count++;
   }
 

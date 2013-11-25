@@ -35,16 +35,24 @@ function moduleDidLoad() {
 }
 
 function handleMessage(message_event) {
-  console.log( "Received " + message_event.data.length + " results" );
-  var tDiff = Date.now() - lastClick;
   var res = message_event.data;
-  updateStatus( "Received: " + res[res.length-1].Mean.toFixed(7) 
-    + " +/- " + res[res.length-1].StdError.toFixed(7) 
-    +  " after " + tDiff + "ms" + " for " + nPtsSim + " points" );
-  updateTable( res );
-  updatePlot( res );
-  var go = document.getElementById( "go" );
-  go.disabled = false;
+  if ( Object.prototype.toString.call( res ) === "[object Array]") {
+    console.log( "Received " + res.length + " results" );
+    var tDiff = Date.now() - lastClick;
+    updateStatus( "Received: " + res[res.length-1].Mean.toFixed(7) 
+        + " +/- " + res[res.length-1].StdError.toFixed(7) 
+        +  " after " + tDiff + "ms" + " for " + nPtsSim + " points" );
+    updateTable( res );
+    updatePlot( res );
+    var go = document.getElementById( "go" );
+    go.disabled = false;
+  } else {
+    d3.select("#results table").remove(); // Remove old data
+    d3.select("#plot svg").remove(); // Remove old data
+    updateStatus( "Received: " + res.Mean.toFixed(7) 
+        + " +/- " + res.StdError.toFixed(7) 
+        + " after " + 100*res.Samples/nPtsSim + "% completion" );
+  }
 }
 
 function updateStatus( optMessage ) {
