@@ -39,7 +39,7 @@ void MonteCarloInstance::HandleMessage( const pp::Var& var_message ) {
     return; //Early exit
   auto N = var_message.AsInt();
   
-  // std::thread t(&MonteCarloInstance::Simulate, this, N);
-  // t.join();
+  //std::thread t(&MonteCarloInstance::Simulate, this, N);
+  //t.detach();
   Simulate(N);
 }
