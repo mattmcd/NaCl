@@ -11,9 +11,7 @@ class MonteCarloInstance : public pp::Instance {
       : pp::Instance(instance) { };
     virtual ~MonteCarloInstance( ){};
     virtual void HandleMessage( const pp::Var& );
-    result sim(unsigned int N) {
-      return mc.sim( N );
-    }
+    void Simulate(unsigned int N); 
   private:
     MonteCarlo mc;
 };

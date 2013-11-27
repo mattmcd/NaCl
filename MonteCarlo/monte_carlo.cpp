@@ -2,21 +2,24 @@
 #include "ppapi/cpp/var_dictionary.h"
 #include "ppapi/cpp/var_array.h"
 #include <vector>
-#include <future>
+#include <thread>
+#include <functional>
 
 pp::Module* pp::CreateModule() {
   return new InstanceFactory<MonteCarloInstance>();
 }
 
-void monteCarloSim( MonteCarloInstance& instance, unsigned int N, unsigned int nParts ) {
+void MonteCarloInstance::Simulate( unsigned int N ) {
   pp::VarArray reply;
 
+  // Run the simulation in 10 parts
+  const len_t nParts = 10;
   auto step = N/nParts;
   step = step > 0 ? step : 1;
   len_t runningTotal = 0;
   unsigned int count=0;
   for( len_t i=step; i<=N; i += step) {
-    auto res = instance.sim(step);
+    auto res = mc.sim(step);
     pp::VarDictionary outData;
     runningTotal += res.Total;
     outData.Set( "Samples", static_cast<double>(i) );
@@ -25,10 +28,10 @@ void monteCarloSim( MonteCarloInstance& instance, unsigned int N, unsigned int n
     outData.Set( "Mean", runningMean );
     outData.Set( "StdError", sqrt( runningMean*(1.0-runningMean)/i));
     reply.Set( count, outData );
-    instance.PostMessage( outData ); // For progress measurement
+    PostMessage( outData ); // For progress measurement
     count++;
   }
-  instance.PostMessage( reply );
+  PostMessage( reply );
 }
 
 void MonteCarloInstance::HandleMessage( const pp::Var& var_message ) {
@@ -36,8 +39,7 @@ void MonteCarloInstance::HandleMessage( const pp::Var& var_message ) {
     return; //Early exit
   auto N = var_message.AsInt();
   
-  // Run the simulation in 10 parts
-  const len_t nParts = 10;
-
-  monteCarloSim( *this, N, nParts );
+  // std::thread t(&MonteCarloInstance::Simulate, this, N);
+  // t.join();
+  Simulate(N);
 }
