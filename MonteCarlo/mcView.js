@@ -49,9 +49,13 @@ function handleMessage(message_event) {
   } else {
     d3.select("#results table").remove(); // Remove old data
     d3.select("#plot svg").remove(); // Remove old data
-    updateStatus( "Received: " + res.Mean.toFixed(7) 
-        + " +/- " + res.StdError.toFixed(7) 
-        + " after " + 100*res.Samples/nPtsSim + "% completion" );
+    if ( typeof res == "string" ) {
+      updateStatus( res );
+    } else {
+      updateStatus( "Received: " + res.Mean.toFixed(7) 
+          + " +/- " + res.StdError.toFixed(7) 
+          + " after " + 100*res.Samples/nPtsSim + "% completion" );
+    }
   }
 }
 
@@ -60,7 +64,7 @@ function updateStatus( optMessage ) {
     statusText = optMessage;
   var statusField = document.getElementById("statusField");
   if (statusField) {
-    statusField.innerHTML = statusText;
+    statusField.innerHTML = " : " + statusText;
   }
 }
 
