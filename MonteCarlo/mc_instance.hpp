@@ -25,6 +25,7 @@ class MonteCarloInstance : public pp::Instance {
     }
 
   private:
+    bool run_simulation_;
     MonteCarlo mc;
     pp::CompletionCallbackFactory<MonteCarloInstance> callback_factory_;
     pp::SimpleThread sim_thread_; // Thread for MC simulations

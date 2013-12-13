@@ -17,11 +17,13 @@ void MonteCarloInstance::Simulate( int32_t /*result*/,  unsigned int N) {
   len_t runningTotal = 0;
   unsigned int count=0;
   for( len_t i=step; i<=N; i += step) {
-    auto res = mc.sim(step);
-    runningTotal += res.Total;
-    auto outData = PostResponse( runningTotal, i);
-    reply.Set( count, outData );
-    count++;
+    if ( run_simulation_ ) {
+      auto res = mc.sim(step);
+      runningTotal += res.Total;
+      auto outData = PostResponse( runningTotal, i);
+      reply.Set( count, outData );
+      count++;
+    }
   }
   PostMessage( reply );
 }
@@ -38,13 +40,20 @@ pp::VarDictionary MonteCarloInstance::PostResponse( len_t runningTotal, len_t i)
 }
 
 void MonteCarloInstance::HandleMessage( const pp::Var& var_message ) {
-  if ( !var_message.is_number() )
-    return; //Early exit
-  auto N = var_message.AsInt();
-  
-  //std::thread t(&MonteCarloInstance::Simulate, this, N);
-  //t.detach();
-  // Simulate(N);
-  sim_thread_.message_loop().PostWork( 
-    callback_factory_.NewCallback( &MonteCarloInstance::Simulate, N));
+  // Simple interface:  
+  // - receive a number = start simulation with that number of runs
+  // - receive anything else = stop the simulation
+  if ( var_message.is_number() ) {
+    // Message is number of simulations to run
+    auto N = var_message.AsInt();
+    // Enable simulation
+    run_simulation_ = true;
+    // Start simulation on background thread
+    sim_thread_.message_loop().PostWork( 
+        callback_factory_.NewCallback( &MonteCarloInstance::Simulate, N));
+  } else {
+    // Disable simulation - background thread will see this at start of
+    // next iteration and terminate early
+    run_simulation_ = false;
+  }
 }

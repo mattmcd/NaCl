@@ -25,13 +25,19 @@ function moduleDidLoad() {
   var go = document.getElementById( "go" );
   var nPts = document.getElementById( "nPts" );
   go.onclick = function() {
-    go.disabled = true;
     nPtsSim = Number( nPts.value );
     console.log( "Sending " + nPtsSim);
     lastClick = Date.now();
-    MonteCarloModule.postMessage( nPtsSim ); }; 
-  go.disabled = false;
-  nPts.disabled = false;
+    MonteCarloModule.postMessage( nPtsSim ); 
+    updateControls_SimRunning();
+    }; 
+  // Stop button
+  var stop = document.getElementById( "stop" );
+  stop.onclick = function() {
+    console.log( "Stop sent" );
+    MonteCarloModule.postMessage( "stop" );
+  }
+  updateControls_SimStopped();
 }
 
 function handleMessage(message_event) {
@@ -41,11 +47,10 @@ function handleMessage(message_event) {
     var tDiff = Date.now() - lastClick;
     updateStatus( "Received: " + res[res.length-1].Mean.toFixed(7) 
         + " +/- " + res[res.length-1].StdError.toFixed(7) 
-        +  " after " + tDiff + "ms" + " for " + nPtsSim + " points" );
+        +  " after " + tDiff + "ms" + " for " + res[res.length-1].Samples + " points" );
     updateTable( res );
     updatePlot( res );
-    var go = document.getElementById( "go" );
-    go.disabled = false;
+    updateControls_SimStopped();
   } else {
     d3.select("#results table").remove(); // Remove old data
     d3.select("#plot svg").remove(); // Remove old data
@@ -102,4 +107,22 @@ function updatePlot( res ){
     .style("fill", "steelblue");
   chart.append("line").attr("x1", 0).attr("x2",w).attr("y1",h).attr("y2",h).style("stroke","#000000");
   chart.append("line").attr("x1", 0).attr("x2",0).attr("y1",h).attr("y2",0).style("stroke","#000000");
+}
+
+function updateControls_SimRunning() {
+  var go = document.getElementById( "go" );
+  var nPts = document.getElementById( "nPts" );
+  var stop = document.getElementById( "stop" );
+  go.disabled = true;
+  nPts.disabled = true;
+  stop.disabled = false;
+}
+
+function updateControls_SimStopped() {
+  var go = document.getElementById( "go" );
+  var nPts = document.getElementById( "nPts" );
+  var stop = document.getElementById( "stop" );
+  go.disabled = false;
+  nPts.disabled = false;
+  stop.disabled = true;
 }
