@@ -28,14 +28,15 @@ function moduleDidLoad() {
     nPtsSim = Number( nPts.value );
     console.log( "Sending " + nPtsSim);
     lastClick = Date.now();
-    MonteCarloModule.postMessage( nPtsSim ); 
+    var cmd = { cmd: 'sim', nPts: nPtsSim};
+    MonteCarloModule.postMessage( cmd ); 
     updateControls_SimRunning();
     }; 
   // Stop button
   var stop = document.getElementById( "stop" );
   stop.onclick = function() {
     console.log( "Stop sent" );
-    MonteCarloModule.postMessage( "stop" );
+    MonteCarloModule.postMessage( { cmd: "stop" } );
   }
   updateControls_SimStopped();
 }

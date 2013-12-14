@@ -40,12 +40,14 @@ pp::VarDictionary MonteCarloInstance::PostResponse( len_t runningTotal, len_t i)
 }
 
 void MonteCarloInstance::HandleMessage( const pp::Var& var_message ) {
-  // Simple interface:  
-  // - receive a number = start simulation with that number of runs
+  // Interface: receive a { cmd: ..., args... } dictionary  
+  // - sim, nPts = start simulation with that number of runs
   // - receive anything else = stop the simulation
-  if ( var_message.is_number() ) {
+  pp::VarDictionary var_dict( var_message );
+  auto cmd = var_dict.Get( "cmd" ).AsString();
+  if ( cmd == "sim" ) {
     // Message is number of simulations to run
-    auto N = var_message.AsInt();
+    auto N = var_dict.Get("nPts").AsInt();
     // Enable simulation
     run_simulation_ = true;
     // Start simulation on background thread
