@@ -35,7 +35,7 @@ class MonteCarloInstance : public pp::Instance {
     void Version( int32_t ) {
       pp::VarDictionary msg;
       msg.Set( "Type", "version" );
-      msg.Set( "Version", "Monte Carlo Version 0.1.1" );
+      msg.Set( "Version", "Monte Carlo Version 0.2" );
       // Get models
       auto modelFactory = ModelFactory::getInstance();
       auto modelList = modelFactory.getModelNames();
