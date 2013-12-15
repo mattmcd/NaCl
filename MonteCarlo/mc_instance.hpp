@@ -1,6 +1,7 @@
 #ifndef MC_INSTANCE
 #define MC_INSTANCE
 
+#include "model_factory.hpp"
 #include "instance_factory.hpp"
 #include "monte_carlo.hpp"
 #include "ppapi/cpp/var_dictionary.h"
@@ -29,12 +30,20 @@ class MonteCarloInstance : public pp::Instance {
     MonteCarlo mc;
     pp::CompletionCallbackFactory<MonteCarloInstance> callback_factory_;
     pp::SimpleThread sim_thread_; // Thread for MC simulations
-    void Simulate(int32_t, unsigned int N); 
+    void Simulate(int32_t, std::function<int(double,double)>, unsigned int N); 
     pp::VarDictionary PostResponse( len_t runningTotal, len_t i);
     void Version( int32_t ) {
       pp::VarDictionary msg;
       msg.Set( "Type", "version" );
-      msg.Set( "Version", "Monte Carlo Version 0.1" );
+      msg.Set( "Version", "Monte Carlo Version 0.1.1" );
+      // Get models
+      auto modelFactory = ModelFactory::getInstance();
+      auto modelList = modelFactory.getModelNames();
+      pp::VarArray msgModelList;
+      for ( size_t i=0; i < modelList.size(); i ++ ) {
+        msgModelList.Set( i, modelList[i] );
+      }
+      msg.Set( "Models", msgModelList );
       PostMessage( msg );
     }
 };

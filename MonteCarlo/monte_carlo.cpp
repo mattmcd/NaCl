@@ -1,4 +1,5 @@
 #include "mc_instance.hpp"
+#include "model_factory.hpp"
 #include <vector>
 #include <thread>
 #include <functional>
@@ -7,7 +8,8 @@ pp::Module* pp::CreateModule() {
   return new InstanceFactory<MonteCarloInstance>();
 }
 
-void MonteCarloInstance::Simulate( int32_t /*result*/,  unsigned int N) {
+void MonteCarloInstance::Simulate( int32_t /*result*/,  
+        std::function<int(double,double)> model, unsigned int N) {
   // Run the simulation in 10 parts or max 1e6 points at a time
   const len_t nParts = 10;
   auto step = N/nParts;
@@ -17,7 +19,7 @@ void MonteCarloInstance::Simulate( int32_t /*result*/,  unsigned int N) {
   unsigned int count=0;
   for( len_t i=step; i<=N; i += step) {
     if ( run_simulation_ ) {
-      auto res = mc.sim(step);
+      auto res = mc.sim(model, step);
       runningTotal += res.Total;
       auto outData = PostResponse( runningTotal, i);
       count++;
@@ -49,11 +51,13 @@ void MonteCarloInstance::HandleMessage( const pp::Var& var_message ) {
   if ( cmd == "sim" ) {
     // Message is number of simulations to run
     auto N = var_dict.Get("nPts").AsInt();
+    auto modelFactory = ModelFactory::getInstance();
+    auto model = modelFactory.getModel( var_dict.Get("model").AsString() );
     // Enable simulation
     run_simulation_ = true;
     // Start simulation on background thread
     sim_thread_.message_loop().PostWork( 
-        callback_factory_.NewCallback( &MonteCarloInstance::Simulate, N));
+        callback_factory_.NewCallback( &MonteCarloInstance::Simulate, model, N));
   } else {
     // Disable simulation - background thread will see this at start of
     // next iteration and terminate early

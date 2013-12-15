@@ -26,6 +26,7 @@ function moduleDidLoad() {
   updateStatus( "OK" );
   var go = document.getElementById( "go" );
   var nPts = document.getElementById( "nPts" );
+  var modelList = document.getElementById( "model" );
   go.onclick = function() {
     nPtsSim = Number( nPts.value );
     console.log( "Sending " + nPtsSim);
@@ -33,7 +34,8 @@ function moduleDidLoad() {
     lastClick = Date.now();
     // clear results
     results.length = 0;
-    var cmd = { cmd: 'sim', nPts: nPtsSim};
+    var model = modelList[ modelList.selectedIndex ].text;
+    var cmd = { cmd: "sim", nPts: nPtsSim, model: model };
     MonteCarloModule.postMessage( cmd ); 
     updateControls_SimRunning();
     }; 
@@ -50,6 +52,7 @@ function handleMessage(message_event) {
   var res = message_event.data;
   if ( res.Type == "version" ) {
     updateStatus( res.Version );
+    updateModels( res.Models );
   } else if ( res.Type == "partial" ) {
     var pctComplete = 100*res.Samples/nPtsSim;
     if ( Math.floor( pctComplete/10 ) > results.length ) {
@@ -84,6 +87,14 @@ function updateStatus( optMessage ) {
   if (statusField) {
     statusField.innerHTML = " : " + statusText;
   }
+}
+
+function updateModels( models ) {
+  // Add model names to listbox
+  var modelList = d3.select("#model");
+  var options = modelList.selectAll("option")
+    .data( models ).enter().append("option")
+    .text( function (d) {return d; });
 }
 
 function updateTable( res ) {
@@ -127,17 +138,21 @@ function updateControls_SimRunning() {
   d3.select("#plot svg").remove(); // Remove old data
   var go = document.getElementById( "go" );
   var nPts = document.getElementById( "nPts" );
+  var model = document.getElementById( "model" );
   var stop = document.getElementById( "stop" );
   go.disabled = true;
   nPts.disabled = true;
+  model.disabled = true;
   stop.disabled = false;
 }
 
 function updateControls_SimStopped() {
   var go = document.getElementById( "go" );
   var nPts = document.getElementById( "nPts" );
+  var model = document.getElementById( "model" );
   var stop = document.getElementById( "stop" );
   go.disabled = false;
   nPts.disabled = false;
+  model.disabled = false;
   stop.disabled = true;
 }
