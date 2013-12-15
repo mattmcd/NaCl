@@ -8,10 +8,11 @@ pp::Module* pp::CreateModule() {
 }
 
 void MonteCarloInstance::Simulate( int32_t /*result*/,  unsigned int N) {
-  // Run the simulation in 10 parts
+  // Run the simulation in 10 parts or max 1e6 points at a time
   const len_t nParts = 10;
   auto step = N/nParts;
   step = step > 0 ? step : 1;
+  step = step < 1e6 ? step : 1e6;
   len_t runningTotal = 0;
   unsigned int count=0;
   for( len_t i=step; i<=N; i += step) {

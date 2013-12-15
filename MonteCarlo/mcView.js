@@ -51,20 +51,28 @@ function handleMessage(message_event) {
   if ( res.Type == "version" ) {
     updateStatus( res.Version );
   } else if ( res.Type == "partial" ) {
-    results[results.length] = res; // Add result to list of results
+    var pctComplete = 100*res.Samples/nPtsSim;
+    if ( Math.floor( pctComplete/10 ) > results.length ) {
+      results[results.length] = res; // Add result to list of results
+    }
     updateStatus( "Received: " + res.Mean.toFixed(7) 
         + " +/- " + res.StdError.toFixed(7) 
-        + " after " + 100*res.Samples/nPtsSim + "% completion" );
+        + " after " + pctComplete.toFixed(1) + "% completion" );
   }
   if ( res.Type == "completed" ) {
-    // Show the full table and plot
-    console.log( "Received " + results.length + " results" );
-    var tDiff = Date.now() - lastClick;
-    updateStatus( "Received: " + results[results.length-1].Mean.toFixed(7) 
-        + " +/- " + results[results.length-1].StdError.toFixed(7) 
-        +  " after " + tDiff + "ms" + " for " + results[results.length-1].Samples + " points" );
-    updateTable( results );
-    updatePlot( results );
+    if ( results.length > 0 ) {
+      // Show the full table and plot
+      console.log( "Received " + results.length + " results" );
+      var tDiff = Date.now() - lastClick;
+      updateStatus( "Received: " + results[results.length-1].Mean.toFixed(7) 
+          + " +/- " + results[results.length-1].StdError.toFixed(7) 
+          +  " after " + tDiff + "ms" + " for " + results[results.length-1].Samples + " points" );
+      updateTable( results );
+      updatePlot( results );
+    } else {
+      // Simulation stopped before any data received
+      updateStatus( "Stopped" );
+    }
     updateControls_SimStopped();
   }
 }
