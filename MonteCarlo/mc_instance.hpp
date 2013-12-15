@@ -32,7 +32,10 @@ class MonteCarloInstance : public pp::Instance {
     void Simulate(int32_t, unsigned int N); 
     pp::VarDictionary PostResponse( len_t runningTotal, len_t i);
     void Version( int32_t ) {
-      PostMessage("Monte Carlo Version 0.1");
+      pp::VarDictionary msg;
+      msg.Set( "Type", "version" );
+      msg.Set( "Version", "Monte Carlo Version 0.1" );
+      PostMessage( msg );
     }
 };
 

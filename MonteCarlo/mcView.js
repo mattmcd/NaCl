@@ -1,12 +1,14 @@
 // Global handle to module
-MonteCarloModule = null;
+var MonteCarloModule = null;
 
 // Global status message
-statusText = 'NO-STATUS';
+var statusText = 'NO-STATUS';
 
-lastClick = null;
+var lastClick = null;
 
-nPtsSim = null;
+var nPtsSim = null;
+
+var results = new Array();
 
 function pageDidLoad() {
   var listener = document.getElementById("listener");
@@ -27,7 +29,10 @@ function moduleDidLoad() {
   go.onclick = function() {
     nPtsSim = Number( nPts.value );
     console.log( "Sending " + nPtsSim);
+    updateStatus( "Sending " + nPtsSim);
     lastClick = Date.now();
+    // clear results
+    results.length = 0;
     var cmd = { cmd: 'sim', nPts: nPtsSim};
     MonteCarloModule.postMessage( cmd ); 
     updateControls_SimRunning();
@@ -43,25 +48,24 @@ function moduleDidLoad() {
 
 function handleMessage(message_event) {
   var res = message_event.data;
-  if ( Object.prototype.toString.call( res ) === "[object Array]") {
-    console.log( "Received " + res.length + " results" );
+  if ( res.Type == "version" ) {
+    updateStatus( res.Version );
+  } else if ( res.Type == "partial" ) {
+    results[results.length] = res; // Add result to list of results
+    updateStatus( "Received: " + res.Mean.toFixed(7) 
+        + " +/- " + res.StdError.toFixed(7) 
+        + " after " + 100*res.Samples/nPtsSim + "% completion" );
+  }
+  if ( res.Type == "completed" ) {
+    // Show the full table and plot
+    console.log( "Received " + results.length + " results" );
     var tDiff = Date.now() - lastClick;
-    updateStatus( "Received: " + res[res.length-1].Mean.toFixed(7) 
-        + " +/- " + res[res.length-1].StdError.toFixed(7) 
-        +  " after " + tDiff + "ms" + " for " + res[res.length-1].Samples + " points" );
-    updateTable( res );
-    updatePlot( res );
+    updateStatus( "Received: " + results[results.length-1].Mean.toFixed(7) 
+        + " +/- " + results[results.length-1].StdError.toFixed(7) 
+        +  " after " + tDiff + "ms" + " for " + results[results.length-1].Samples + " points" );
+    updateTable( results );
+    updatePlot( results );
     updateControls_SimStopped();
-  } else {
-    d3.select("#results table").remove(); // Remove old data
-    d3.select("#plot svg").remove(); // Remove old data
-    if ( typeof res == "string" ) {
-      updateStatus( res );
-    } else {
-      updateStatus( "Received: " + res.Mean.toFixed(7) 
-          + " +/- " + res.StdError.toFixed(7) 
-          + " after " + 100*res.Samples/nPtsSim + "% completion" );
-    }
   }
 }
 
@@ -111,6 +115,8 @@ function updatePlot( res ){
 }
 
 function updateControls_SimRunning() {
+  d3.select("#results table").remove(); // Remove old data
+  d3.select("#plot svg").remove(); // Remove old data
   var go = document.getElementById( "go" );
   var nPts = document.getElementById( "nPts" );
   var stop = document.getElementById( "stop" );

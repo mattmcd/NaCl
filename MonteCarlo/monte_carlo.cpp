@@ -8,8 +8,6 @@ pp::Module* pp::CreateModule() {
 }
 
 void MonteCarloInstance::Simulate( int32_t /*result*/,  unsigned int N) {
-  pp::VarArray reply;
-
   // Run the simulation in 10 parts
   const len_t nParts = 10;
   auto step = N/nParts;
@@ -21,15 +19,17 @@ void MonteCarloInstance::Simulate( int32_t /*result*/,  unsigned int N) {
       auto res = mc.sim(step);
       runningTotal += res.Total;
       auto outData = PostResponse( runningTotal, i);
-      reply.Set( count, outData );
       count++;
     }
   }
-  PostMessage( reply );
+  pp::VarDictionary msg;
+  msg.Set( "Type", "completed" );
+  PostMessage( msg );
 }
 
 pp::VarDictionary MonteCarloInstance::PostResponse( len_t runningTotal, len_t i){
   pp::VarDictionary outData;
+  outData.Set( "Type", "partial" );
   outData.Set( "Samples", static_cast<double>(i) );
   outData.Set( "Total", static_cast<double>(runningTotal) );
   auto runningMean = 1.0*runningTotal/i;
