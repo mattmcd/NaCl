@@ -12,7 +12,7 @@ class SingletonFactory {
     T getObject( std::string name );
     std::vector<std::string> getNames();
     static SingletonFactory& getInstance();
-    void registerSingleton( std::string name, T fcn) ;
+    void registerObject( std::string name, T fcn) ;
     ~SingletonFactory(){};
   private:
     std::map<std::string, T> SingletonCreatorFcns;
@@ -20,21 +20,21 @@ class SingletonFactory {
 };
 
 template <typename T>
-class SingletonRegister {
+class ObjectRegister {
   // Helper class to allow registration of scenes by construction of global
   // variables in a hidden namespace.  
   // See p164 of Joshi "C++ design patterns for derivatives pricing"
   // Note that the C++11 language features make this pattern a lot simpler.
 
   public:
-    SingletonRegister( std::string name, T fcn ) {
+    ObjectRegister( std::string name, T fcn ) {
       SingletonFactory<T>& theFactory = SingletonFactory<T>::getInstance();
-      theFactory.registerSingleton( name, fcn );
+      theFactory.registerObject( name, fcn );
     }
 };
 
 template <typename T>
-void SingletonFactory<T>::registerSingleton( std::string name, T fcn) {
+void SingletonFactory<T>::registerObject( std::string name, T fcn) {
   SingletonCreatorFcns.insert( 
     std::pair<std::string, T>(name, fcn));
 }
