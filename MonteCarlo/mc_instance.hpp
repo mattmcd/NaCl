@@ -1,7 +1,7 @@
 #ifndef MC_INSTANCE
 #define MC_INSTANCE
 
-#include "model_factory.hpp"
+#include "singleton_factory.hpp"
 #include "instance_factory.hpp"
 #include "monte_carlo.hpp"
 #include "ppapi/cpp/var_dictionary.h"
@@ -35,10 +35,10 @@ class MonteCarloInstance : public pp::Instance {
     void Version( int32_t ) {
       pp::VarDictionary msg;
       msg.Set( "Type", "version" );
-      msg.Set( "Version", "Monte Carlo Version 0.2" );
+      msg.Set( "Version", "Monte Carlo Version 0.2.1" );
       // Get models
-      auto modelFactory = ModelFactory::getInstance();
-      auto modelList = modelFactory.getModelNames();
+      auto modelFactory = SingletonFactory<std::function<int(double,double)>>::getInstance();
+      auto modelList = modelFactory.getNames();
       pp::VarArray msgModelList;
       for ( size_t i=0; i < modelList.size(); i ++ ) {
         msgModelList.Set( i, modelList[i] );

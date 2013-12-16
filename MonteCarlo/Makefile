@@ -34,8 +34,8 @@ test_mc: monte_carlo.hpp test_mc.cpp
 clean:
 	$(RM) monte_carlo.pexe monte_carlo.bc
 
-monte_carlo.bc: monte_carlo.cpp monte_carlo.hpp instance_factory.hpp mc_instance.hpp model_factory.hpp model_factory.cpp model_circle.cpp model_parabola.cpp
-	$(PNACL_CXX) -o $@ $< model_factory.cpp model_circle.cpp model_parabola.cpp -O2 $(CXXFLAGS) $(LDFLAGS)
+monte_carlo.bc: monte_carlo.cpp monte_carlo.hpp instance_factory.hpp mc_instance.hpp singleton_factory.hpp model_circle.cpp model_parabola.cpp
+	$(PNACL_CXX) -o $@ $< model_circle.cpp model_parabola.cpp -O2 $(CXXFLAGS) $(LDFLAGS)
 
 monte_carlo.pexe: monte_carlo.bc
 	$(PNACL_FINALIZE) -o $@ $<

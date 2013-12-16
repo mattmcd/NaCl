@@ -1,7 +1,7 @@
-#include "model_factory.hpp"
+#include "singleton_factory.hpp"
 
 namespace {
-  auto parabolaReg = ModelRegister("Parabola", 
+  auto parabolaReg = SingletonRegister<std::function<int(double,double)> >("Parabola", 
     [](double x, double y){ return y < x*x  ? 1 : 0; });
 }
 

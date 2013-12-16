@@ -1,5 +1,5 @@
 #include "mc_instance.hpp"
-#include "model_factory.hpp"
+#include "singleton_factory.hpp"
 #include <vector>
 #include <thread>
 #include <functional>
@@ -51,8 +51,8 @@ void MonteCarloInstance::HandleMessage( const pp::Var& var_message ) {
   if ( cmd == "sim" ) {
     // Message is number of simulations to run
     auto N = var_dict.Get("nPts").AsInt();
-    auto modelFactory = ModelFactory::getInstance();
-    auto model = modelFactory.getModel( var_dict.Get("model").AsString() );
+    auto modelFactory = SingletonFactory<std::function<int(double,double)>>::getInstance();
+    auto model = modelFactory.getObject( var_dict.Get("model").AsString() );
     // Enable simulation
     run_simulation_ = true;
     // Start simulation on background thread
