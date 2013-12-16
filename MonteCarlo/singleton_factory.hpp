@@ -9,8 +9,8 @@
 template <typename T>
 class SingletonFactory {
   public:
-    T getObject( std::string name );
-    std::vector<std::string> getNames();
+    T getObject( std::string name ) const;
+    std::vector<std::string> getNames() const;
     static SingletonFactory& getInstance();
     void registerObject( std::string name, T fcn) ;
     ~SingletonFactory(){};
@@ -40,7 +40,7 @@ void SingletonFactory<T>::registerObject( std::string name, T fcn) {
 }
 
 template <typename T>
-T SingletonFactory<T>::getObject( std::string name) {
+T SingletonFactory<T>::getObject( std::string name) const {
   auto it = SingletonCreatorFcns.find(name);
   if ( it == SingletonCreatorFcns.end() ) {
     return NULL;
@@ -49,7 +49,7 @@ T SingletonFactory<T>::getObject( std::string name) {
 }
 
 template <typename T>
-std::vector<std::string> SingletonFactory<T>::getNames( ) {
+std::vector<std::string> SingletonFactory<T>::getNames( ) const {
   std::vector<std::string> names;
   for (auto entry : SingletonCreatorFcns ) {
     names.push_back( entry.first );
