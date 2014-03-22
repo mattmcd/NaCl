@@ -32,6 +32,7 @@ class ImageProcInstance : public pp::Instance {
     pp::CompletionCallbackFactory<ImageProcInstance> callback_factory_;
     pp::SimpleThread proc_thread_; // Thread for image processor 
     void Process(std::function<cv::Mat(cv::Mat)>, cv::Mat); 
+    void PostTest(); 
     pp::VarDictionary PostResponse( cv::Mat );
     void Version( int32_t ) {
       pp::VarDictionary msg;

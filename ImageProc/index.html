@@ -7,6 +7,8 @@
 <body onLoad="pageDidLoad()">
   <h1>Webcam from Chrome</h1>
 
+  <button id="go">Go</button>
+
   <div id="listener">
     <!-- Embed the NaCl -->
     <embed id="image_proc" width=0 height=0 src="image_proc.nmf"
@@ -19,5 +21,6 @@
     <canvas id="processed" width="640" height="480"></canvas>
   </div>
 
+  <h2>Status <code id="statusField">NO-STATUS</code></h2>
 </body>
 </html>

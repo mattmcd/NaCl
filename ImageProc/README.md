@@ -16,9 +16,8 @@ Rough plan for next few commits:
 Build Setup
 -----------
 There are a few steps needed to configure in order to use OpenCV with NaCl.
-Fortunately, once you become aware of the existence of  
-[NaCl Ports](https://code.google.com/p/naclports/) they are fairly
-straight forward.
+Fortunately, once you become aware of the existence of  [NaCl Ports](https://code.google.com/p/naclports/) 
+they are fairly straight forward.
 
 1. Install [Depo Tools](http://dev.chromium.org/developers/how-tos/install-depot-tools).
 2. [Check out the NaCl Ports](https://code.google.com/p/naclports/wiki/HowTo_Checkout).
