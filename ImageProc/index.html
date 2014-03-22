@@ -7,9 +7,16 @@
 <body onLoad="pageDidLoad()">
   <h1>Webcam from Chrome</h1>
 
+  <div id="listener">
+    <!-- Embed the NaCl -->
+    <embed id="image_proc" width=0 height=0 src="image_proc.nmf"
+           type="application/x-pnacl"/>
+  </div>
+
   <div>
     <video id="live" width="640" height="480" hidden autoplay></video>
     <canvas id="display" width="640" height="480"></canvas>
+    <canvas id="processed" width="640" height="480"></canvas>
   </div>
 
 </body>
