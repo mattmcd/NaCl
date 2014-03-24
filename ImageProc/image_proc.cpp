@@ -51,6 +51,13 @@ void ImageProcInstance::HandleMessage( const pp::Var& var_message )
     Process( processor, Img );
   } else if ( cmd == "test" ) {
     PostTest();
+  } else if ( cmd == "echo" ) {
+      auto data = pp::VarArrayBuffer( var_dict.Get("data") );
+      // auto result = data.is_array_buffer();
+      pp::VarDictionary msg;
+      msg.Set( "Type", "completed" );
+      msg.Set( "Data", data );
+      PostMessage( msg );
   } else {
     // Disable simulation - background thread will see this at start of
     // next iteration and terminate early

@@ -47,11 +47,24 @@ function sendImage() {
   var height = display.height;
   var width = display.width;
   var nBytes = height * width * 4; 
-  var pixels = new Uint8ClampedArray(nBytes);
-  
-  var cmd = { cmd: "process",  width: width, height: height, data: pixels};
-  // var cmd = { cmd: "test" };
+  var pixels = ctx.getImageData(0, 0, width, height);
+  // drawImage( pixels );
+
+  var theCommand = "echo"; // test, process
+  var cmd = { cmd: theCommand,  
+              width: width, 
+              height: height, 
+              data: pixels.data.buffer };
   ImageProcModule.postMessage( cmd ); 
+}
+
+function drawImage(pixels){
+    var processed = document.getElementById("processed");
+    var ctx = processed.getContext( "2d" );
+    var imData = ctx.getImageData(0,0,processed.width,processed.height);
+    var buf8 = new Uint8ClampedArray( pixels );
+    imData.data.set( buf8 );
+    ctx.putImageData( imData, 0, 0);
 }
 
 function moduleDidLoad() {
@@ -69,10 +82,16 @@ function handleMessage(message_event) {
     // updateModels( res.Models );
   }
   if ( res.Type == "completed" ) {
+    if ( res.Data ) {
+      updateStatus( "Received array buffer");
+      // Display processed image    
+      drawImage( res.Data );
+    } else {
+      updateStatus( "Received something unexpected");
+    }
+
     // Display processed image    
-    var processed = document.getElementById("processed");
-    var ctx = processed.getContext( "2d" );
-    ctx.drawImage( res.Data, ctx, 0, 0);
+    //drawImage( res.Data );
   }
 }
 
