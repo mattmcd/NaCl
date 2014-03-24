@@ -1,11 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Image Processing</title>
+  <title>OpenCV in Chrome using NaCl</title>
   <script type="text/javascript" src="video.js"></script>
 </head>
 <body onLoad="pageDidLoad()">
-  <h1>Webcam from Chrome</h1>
+  <h1>OpenCV in Chrome using NaCl</h1>
+
+  <p>This page uses <a
+  href="https://developers.google.com/native-client/dev/">
+  Google Native Client</a> to tie in to the C++ <a
+  href="http://opencv.org/">OpenCV</a> computer vision library.
+  This allows realtime image processing of the webcam feed from within the
+  browser.
+  </p>
+
+  <p>Requires Chrome web browser version 31 or above (not Android app)</p>
 
   <button id="go">Go</button>
 
@@ -16,11 +26,13 @@
   </div>
 
   <div>
-    <video id="live" width="640" height="480" hidden autoplay></video>
-    <canvas id="display" width="640" height="480"></canvas>
-    <canvas id="processed" width="640" height="480"></canvas>
+    <video id="live" width="512" height="384" hidden autoplay></video>
+    <canvas id="display" width="512" height="384"></canvas>
+    <canvas id="processed" width="512" height="384"></canvas>
   </div>
 
   <h2>Status <code id="statusField">NO-STATUS</code></h2>
+
+  <a href="https://github.com/mattmcd/NaCl/tree/master/ImageProc">GitHub repo</a>
 </body>
 </html>
