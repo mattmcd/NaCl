@@ -25,7 +25,7 @@ test_improc: image_proc.hpp test_improc.cpp
 clean:
 	$(RM) image_proc.pexe image_proc.bc
 
-image_proc.bc: image_proc.cpp image_proc.hpp instance_factory.hpp improc_instance.hpp singleton_factory.hpp 
+image_proc.bc: image_proc.cpp image_proc.hpp instance_factory.hpp improc_instance.hpp singleton_factory.hpp processor_id.cpp
 	$(PNACL_CXX) -o $@ $< -O2 $(CXXFLAGS) $(LDFLAGS)
 
 image_proc.pexe: image_proc.bc

@@ -32,6 +32,15 @@ void ImageProcInstance::PostTest()
   PostMessage( msg );
 }
 
+void ImageProcInstance::SendStatus(const std::string& status) 
+{
+  pp::VarDictionary msg;
+  msg.Set( "Type", "status" );
+  msg.Set( "Message", status );
+  PostMessage( msg );
+}
+
+
 void ImageProcInstance::HandleMessage( const pp::Var& var_message ) 
 {
   // Interface: receive a { cmd: ..., args... } dictionary  
@@ -42,13 +51,18 @@ void ImageProcInstance::HandleMessage( const pp::Var& var_message )
     // Message is number of simulations to run
     auto width  = var_dict.Get("width").AsInt();
     auto height = var_dict.Get("height").AsInt();
-    auto data   = static_cast<pp::VarArrayBuffer>(var_dict.Get("data"));
-    auto processorFactory = SingletonFactory<std::function<cv::Mat(cv::Mat)>>::getInstance();
-    auto processor = processorFactory.getObject( var_dict.Get("processor").AsString() );
+    auto data   = pp::VarArrayBuffer( var_dict.Get("data") );
+    // auto processorFactory = SingletonFactory<std::function<cv::Mat(cv::Mat)>>::getInstance();
+    // auto processor = processorFactory.getObject( var_dict.Get("processor").AsString() );
+    SendStatus("Creating processor");
+    auto processor = [](cv::Mat im){ return im; };
     // Convert data to CMat
+    SendStatus("Casting to byte array");
     uint8_t* byteData = static_cast<uint8_t*>(data.Map());
+    SendStatus("Creating cv::Mat");
     auto Img = cv::Mat(height, width, CV_8UC4, byteData );
-    Process( processor, Img );
+    SendStatus("Calling processing");
+    // Process( processor, Img );
   } else if ( cmd == "test" ) {
     PostTest();
   } else if ( cmd == "echo" ) {

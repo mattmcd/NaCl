@@ -50,11 +50,12 @@ function sendImage() {
   var pixels = ctx.getImageData(0, 0, width, height);
   // drawImage( pixels );
 
-  var theCommand = "echo"; // test, process
+  var theCommand = "process"; //"echo"; // test, process
   var cmd = { cmd: theCommand,  
               width: width, 
               height: height, 
-              data: pixels.data.buffer };
+              data: pixels.data.buffer, 
+              processor: "Id" };
   ImageProcModule.postMessage( cmd ); 
 }
 
@@ -83,7 +84,7 @@ function handleMessage(message_event) {
   }
   if ( res.Type == "completed" ) {
     if ( res.Data ) {
-      updateStatus( "Received array buffer");
+      // updateStatus( "Received array buffer");
       // Display processed image    
       drawImage( res.Data );
     } else {
@@ -92,6 +93,9 @@ function handleMessage(message_event) {
 
     // Display processed image    
     //drawImage( res.Data );
+  }
+  if ( res.Type == "status" ) {
+    updateStatus( res.Message );
   }
 }
 
