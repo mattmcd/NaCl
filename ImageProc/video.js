@@ -55,7 +55,7 @@ function sendImage() {
               width: width, 
               height: height, 
               data: pixels.data.buffer, 
-              processor: "Id" };
+              processor: "Invert" };
   ImageProcModule.postMessage( cmd ); 
 }
 

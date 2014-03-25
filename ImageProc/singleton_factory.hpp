@@ -5,6 +5,7 @@
 #include <map>
 #include <functional>
 #include <vector>
+#include <opencv2/core/core.hpp>
 
 template <typename T>
 class SingletonFactory {
