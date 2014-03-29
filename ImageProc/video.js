@@ -6,6 +6,8 @@ var statusText = 'NO-STATUS';
 
 var lastClick = null;
 
+var isRunning = false;
+
 function pageDidLoad() {
   var video = document.getElementById("live");
   var display = document.getElementById("display");
@@ -37,26 +39,31 @@ function pageDidLoad() {
 
 function draw(v,c) {
   c.drawImage(v, 0, 0);
-  setTimeout( draw, 20, v, c); // Redraw every 20ms
+  setTimeout( draw, 50, v, c); // Redraw every 20ms
 }
 
 function sendImage() {
-  // Get the current frame from canvas and send to NaCl
-  var display = document.getElementById("display");
-  var ctx = display.getContext( "2d" );
-  var height = display.height;
-  var width = display.width;
-  var nBytes = height * width * 4; 
-  var pixels = ctx.getImageData(0, 0, width, height);
-  // drawImage( pixels );
+  if ( isRunning ) {
+    // Get the current frame from canvas and send to NaCl
+    var display = document.getElementById("display");
+    var ctx = display.getContext( "2d" );
+    var height = display.height;
+    var width = display.width;
+    var nBytes = height * width * 4; 
+    var pixels = ctx.getImageData(0, 0, width, height);
+    // drawImage( pixels );
 
-  var theCommand = "process"; //"echo"; // test, process
-  var cmd = { cmd: theCommand,  
-              width: width, 
-              height: height, 
-              data: pixels.data.buffer, 
-              processor: "Invert" };
-  ImageProcModule.postMessage( cmd ); 
+    var theCommand = "process"; //"echo"; // test, process
+    var cmd = { cmd: theCommand,  
+      width: width, 
+      height: height, 
+      data: pixels.data.buffer, 
+      processor: "Invert" };
+    ImageProcModule.postMessage( cmd );
+  } else { 
+    updateStatus( 'Stopped' );
+  }
+  setTimeout( sendImage, 100 );
 }
 
 function drawImage(pixels){
@@ -73,7 +80,27 @@ function moduleDidLoad() {
   updateStatus( "OK" );
   var go = document.getElementById( "go" );
   // var modelList = document.getElementById( "model" );
-  go.onclick = sendImage;
+  go.onclick = startSending;
+  var stop = document.getElementById( "stop" );
+  stop.onclick = stopSending;
+  stop.disabled = true;
+}
+
+function startSending() {
+  isRunning = true;
+  var go = document.getElementById( "go" );
+  go.disabled = true;
+  var stop = document.getElementById( "stop" );
+  stop.disabled = false;
+  sendImage();
+}
+
+function stopSending() {
+  isRunning = false;
+  var go = document.getElementById( "go" );
+  go.disabled = false;
+  var stop = document.getElementById( "stop" );
+  stop.disabled = true;
 }
 
 function handleMessage(message_event) {
