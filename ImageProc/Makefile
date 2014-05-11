@@ -13,20 +13,27 @@ RM := $(OSHELPERS) rm
 PNACL_TC_PATH := $(abspath $(NACL_SDK_ROOT)/toolchain/$(OSNAME)_pnacl)
 PNACL_CXX := $(PNACL_TC_PATH)/bin/pnacl-clang++
 PNACL_FINALIZE := $(PNACL_TC_PATH)/bin/pnacl-finalize
-CXXFLAGS := -I$(NACL_SDK_ROOT)/include $(CXXFLAGS) 
-LDFLAGS := -L$(NACL_SDK_ROOT)/lib/pnacl/Release -lppapi_cpp -lppapi -lopencv_core -lz
+PNACL_CXXFLAGS := -I$(NACL_SDK_ROOT)/include $(CXXFLAGS) 
+LDFLAGS := -lopencv_core -lz
+PNACL_LDFLAGS := -L$(NACL_SDK_ROOT)/lib/pnacl/Release -lppapi_cpp -lppapi $(LDFLAGS)
+
+PROCESSORS := $(wildcard processor_*.cpp)
+PROC_OBJECTS := $(PROCESSORS:.cpp=.bc)
 
 # Declare the ALL target first, to make the 'all' target the default build
 all: image_proc.pexe
 
-test_improc: image_proc.hpp test_improc.cpp
-	$(CXX) -o test_improc test_improc.cpp -std=c++11
+test_processor: test_processor.cpp singleton_factory.hpp $(PROCESSORS)
+	g++ -g -o test_processor test_processor.cpp $(PROCESSORS) -std=c++0x $(LDFLAGS)
 
 clean:
 	$(RM) image_proc.pexe image_proc.bc
 
-image_proc.bc: image_proc.cpp image_proc.hpp instance_factory.hpp improc_instance.hpp singleton_factory.hpp processor_id.cpp processor_invert.cpp
-	$(PNACL_CXX) -o $@ $< processor_id.cpp processor_invert.cpp -O2 $(CXXFLAGS) $(LDFLAGS)
+#$(PROC_OBJECTS): $(PROCESSORS) singleton_factory.hpp
+#	$(PNACL_CXX) -o $@ $< -O2 $(CXXFLAGS) $(LDFLAGS)
+
+image_proc.bc: image_proc.cpp image_proc.hpp instance_factory.hpp improc_instance.hpp singleton_factory.hpp $(PROCESSORS)
+	$(PNACL_CXX) -o $@ $< $(PROCESSORS) -O2 $(PNACL_CXXFLAGS) $(PNACL_LDFLAGS)
 
 image_proc.pexe: image_proc.bc
 	$(PNACL_FINALIZE) -o $@ $<

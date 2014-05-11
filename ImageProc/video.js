@@ -32,7 +32,7 @@ function pageDidLoad() {
     updateStatus();
   }
 
-  // Set up interace
+  // Set up inteface
   var go = document.getElementById("go");
   go.addEventListener("onclick", sendImage );
 }
@@ -54,11 +54,12 @@ function sendImage() {
     // drawImage( pixels );
 
     var theCommand = "process"; //"echo"; // test, process
+    var selectedProcessor = getSelectedProcessor();
     var cmd = { cmd: theCommand,  
       width: width, 
       height: height, 
       data: pixels.data.buffer, 
-      processor: "Invert" };
+      processor: selectedProcessor };
     ImageProcModule.postMessage( cmd );
   } else { 
     updateStatus( 'Stopped' );
@@ -107,7 +108,7 @@ function handleMessage(message_event) {
   var res = message_event.data;
   if ( res.Type == "version" ) {
     updateStatus( res.Version );
-    // updateModels( res.Models );
+    updateProcessors( res.Processors );
   }
   if ( res.Type == "completed" ) {
     if ( res.Data ) {
@@ -135,3 +136,21 @@ function updateStatus( optMessage ) {
   }
 }
 
+function updateProcessors( processorNames ) {
+  var processors = document.getElementById( "processor" );
+  for (i=0; i<processorNames.length; i++ ) {
+    var option = document.createElement("option");
+    option.text = processorNames[i];
+    processors.add( option );
+  }
+  processors.disabled = false;
+}
+
+function getSelectedProcessor( ) {
+  var processors = document.getElementById( "processor" );
+  processor = processors[ processors.selectedIndex ].text;
+  if ( !processor ) {
+    processor = "Id";
+  }
+  return processor;
+}
