@@ -85,6 +85,9 @@ function moduleDidLoad() {
   var stop = document.getElementById( "stop" );
   stop.onclick = stopSending;
   stop.disabled = true;
+
+  stop.hidden = false;
+  go.hidden = false;
 }
 
 function startSending() {
@@ -144,6 +147,7 @@ function updateProcessors( processorNames ) {
     processors.add( option );
   }
   processors.disabled = false;
+  processors.hidden = false;
 }
 
 function getSelectedProcessor( ) {

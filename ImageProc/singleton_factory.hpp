@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include <functional>
+#include <memory>
 #include <vector>
 #include <opencv2/core/core.hpp>
 
@@ -29,10 +30,23 @@ class ObjectRegister {
 
   public:
     ObjectRegister( std::string name, T fcn ) {
-      SingletonFactory<T>& theFactory = SingletonFactory<T>::getInstance();
+      auto& theFactory = SingletonFactory<T>::getInstance();
       theFactory.registerObject( name, fcn );
     }
 };
+
+ 
+template <typename T>
+class ProcessorRegister {
+  public:
+    ProcessorRegister( std::string name ) {
+      auto& theFactory = 
+        SingletonFactory<std::function<std::unique_ptr<T>()>>::getInstance();
+      theFactory.registerObject( name, []() { return
+        std::unique_ptr<T>(new T());} );
+    }
+};
+
 
 template <typename T>
 void SingletonFactory<T>::registerObject( std::string name, T fcn) {
