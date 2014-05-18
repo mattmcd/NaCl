@@ -15,8 +15,8 @@ cv::Mat SingleChannelProcessor::operator()(cv::Mat im) {
   cv::Mat blank = cv::Mat( im.size(), CV_8UC1, cv::Scalar(0));
   std::vector<cv::Mat> rgba_out;
   rgba_out.push_back( rgba[0] );
-  rgba_out.push_back( blank );
-  rgba_out.push_back( blank );
+  rgba_out.push_back( rgba[0] );
+  rgba_out.push_back( rgba[0] );
   rgba_out.push_back( rgba[3] );
 
   cv::merge( rgba_out, dest);

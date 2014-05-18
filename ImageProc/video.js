@@ -8,6 +8,8 @@ var lastClick = null;
 
 var isRunning = false;
 
+var samplePeriod = 40; // ms
+
 function pageDidLoad() {
   var video = document.getElementById("live");
   var display = document.getElementById("display");
@@ -39,7 +41,7 @@ function pageDidLoad() {
 
 function draw(v,c) {
   c.drawImage(v, 0, 0);
-  setTimeout( draw, 50, v, c); // Redraw every 20ms
+  setTimeout( draw, samplePeriod, v, c);
 }
 
 function sendImage() {
@@ -64,7 +66,7 @@ function sendImage() {
   } else { 
     updateStatus( 'Stopped' );
   }
-  setTimeout( sendImage, 100 );
+  setTimeout( sendImage, samplePeriod );
 }
 
 function drawImage(pixels){
