@@ -28,19 +28,20 @@ class ImageProcInstance : public pp::Instance {
 
   private:
     bool run_simulation_;
-    ImageProc processor;
+    std::string processorName; // Name of currently selected processor
+    std::unique_ptr<Processor> processor;
     pp::CompletionCallbackFactory<ImageProcInstance> callback_factory_;
     pp::SimpleThread proc_thread_; // Thread for image processor 
-    void Process(std::function<cv::Mat(cv::Mat)>, cv::Mat); 
+    void Process(cv::Mat); 
     void PostTest(); 
     void SendStatus(const std::string& status); 
     pp::VarDictionary PostResponse( cv::Mat );
     void Version( int32_t ) {
       pp::VarDictionary msg;
       msg.Set( "Type", "version" );
-      msg.Set( "Version", "Image Processor 0.2" );
+      msg.Set( "Version", "Image Processor 0.3" );
       // Get processor
-      auto processorFactory = SingletonFactory<std::function<cv::Mat(cv::Mat)>>::getInstance();
+      auto processorFactory = SingletonFactory<std::function<std::unique_ptr<Processor>()>>::getInstance();
       auto processorList = processorFactory.getNames();
       pp::VarArray msgProcessorList;
       for ( size_t i=0; i < processorList.size(); i ++ ) {

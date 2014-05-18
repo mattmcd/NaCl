@@ -11,9 +11,9 @@ int main(int argc, char* argv[])
   if (argc > 1) {
     processorName = argv[1];
   }
-  auto processorFactory = SingletonFactory<std::function<cv::Mat(cv::Mat)>>::getInstance();
-  auto processor = processorFactory.getObject( processorName );
-  auto output = processor( input );
+  auto processorFactory = SingletonFactory<std::function<std::unique_ptr<Processor>()>>::getInstance();
+  auto processor = processorFactory.getObject( processorName )();
+  auto output = (*processor)( input );
   
   std::cout << "Output = " << std::endl << output << std::endl << std::endl;
 

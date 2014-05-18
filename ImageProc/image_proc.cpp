@@ -9,10 +9,9 @@ pp::Module* pp::CreateModule()
   return new InstanceFactory<ImageProcInstance>();
 }
 
-void ImageProcInstance::Process(  
-        std::function<cv::Mat(cv::Mat)> f, cv::Mat im) 
+void ImageProcInstance::Process( cv::Mat im) 
 {
-  auto result = processor.process( f, im );
+  auto result = (*processor)( im );
   auto nBytes = result.elemSize() * result.total();
   pp::VarDictionary msg;
   pp::VarArrayBuffer data(nBytes);
@@ -52,10 +51,16 @@ void ImageProcInstance::HandleMessage( const pp::Var& var_message )
     auto width  = var_dict.Get("width").AsInt();
     auto height = var_dict.Get("height").AsInt();
     auto data   = pp::VarArrayBuffer( var_dict.Get("data") );
-    SendStatus("Creating processor factory");
-    auto processorFactory = SingletonFactory<std::function<cv::Mat(cv::Mat)>>::getInstance();
-    SendStatus("Creating processor");
-    auto processor = processorFactory.getObject( var_dict.Get("processor").AsString() );
+    auto selectedProcessor = var_dict.Get("processor").AsString();
+    if ( selectedProcessor != processorName ) {
+      SendStatus("Creating processor factory");
+      auto processorFactory = SingletonFactory<std::function<std::unique_ptr<Processor>()>>::getInstance();
+      SendStatus("Creating processor");
+      processor = processorFactory.getObject( selectedProcessor )();
+      processorName = selectedProcessor;
+    } else {
+      SendStatus("Reusing processor");
+    }
     // auto processor = [](cv::Mat im){ return im; };
     // Convert data to CMat
     SendStatus("Casting to byte array");
@@ -63,7 +68,7 @@ void ImageProcInstance::HandleMessage( const pp::Var& var_message )
     SendStatus("Creating cv::Mat");
     auto Img = cv::Mat(height, width, CV_8UC4, byteData );
     SendStatus("Calling processing");
-    Process( processor, Img );
+    Process( Img );
   } else if ( cmd == "test" ) {
     PostTest();
   } else if ( cmd == "echo" ) {

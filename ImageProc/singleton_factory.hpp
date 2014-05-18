@@ -6,7 +6,7 @@
 #include <functional>
 #include <memory>
 #include <vector>
-#include <opencv2/core/core.hpp>
+#include "processor.hpp"
 
 template <typename T>
 class SingletonFactory {
@@ -35,13 +35,13 @@ class ObjectRegister {
     }
 };
 
- 
+// Singleton factory for registering derived Processor classes 
 template <typename T>
 class ProcessorRegister {
   public:
     ProcessorRegister( std::string name ) {
       auto& theFactory = 
-        SingletonFactory<std::function<std::unique_ptr<T>()>>::getInstance();
+        SingletonFactory<std::function<std::unique_ptr<Processor>()>>::getInstance();
       theFactory.registerObject( name, []() { return
         std::unique_ptr<T>(new T());} );
     }
