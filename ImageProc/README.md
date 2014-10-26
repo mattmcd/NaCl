@@ -13,7 +13,11 @@ Rough plan for next few commits:
 - [x] Send canvas image as ArrayBuffer to Native Client.
 - [x] NaCl echoes image that has been received.
 - [x] Javascript puts echoed image to __processed__ canvas
-- [ ] Start playing with OpenCV image processing
+- [x] Start playing with OpenCV image processing
+- [x] Use strategy pattern on the C++ side to register new image processors
+- [x] Modify NaCl getVersion interface to return list f available processors
+- [x] Use returned list of processors to populate js list selector
+- [ ] Get the [Pulse Detection](http://people.csail.mit.edu/mrub/vidmag/) filter working 
 
 [Try it out!](http://www.matt-mcdonnell.com/code/NaCl/ImageProc/index.html)
 
