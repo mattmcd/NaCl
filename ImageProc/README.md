@@ -13,9 +13,16 @@ Rough plan for next few commits:
 - [x] Send canvas image as ArrayBuffer to Native Client.
 - [x] NaCl echoes image that has been received.
 - [x] Javascript puts echoed image to __processed__ canvas
-- [ ] Start playing with OpenCV image processing
+- [x] Start playing with OpenCV image processing
+- [x] Use strategy pattern on the C++ side to register new image processors
+- [x] Modify NaCl getVersion interface to return list of available processors
+- [x] Use returned list of processors to populate js list selector
+- [ ] Get the [Pulse Detection](http://people.csail.mit.edu/mrub/vidmag/) filter working 
 
-[Try it out!](http://www.matt-mcdonnell.com/code/NaCl/ImageProc/index.html)
+[Try it out!](http://www.matt-mcdonnell.com/code/NaCl/ImageProc/index.html) - you may need 
+to clear the cache to see any updates.  To do this open Chrome Developer Tools (Ctrl-Shift-i or F12), 
+then click and hold Reload, choose "Empty Cache and Hard Reload" from the popup menu.  Popup menu may
+only appear if you have a cached page i.e. have previously visited.
 
 Build Setup
 -----------
