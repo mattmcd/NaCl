@@ -8,7 +8,7 @@ var lastClick = null;
 
 var isRunning = false;
 
-var samplePeriod = 40; // ms
+var samplePeriod = 200; // ms
 
 function pageDidLoad() {
   var video = document.getElementById("live");
