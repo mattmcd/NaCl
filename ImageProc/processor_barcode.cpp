@@ -2,14 +2,14 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include <algorithm>
 
-class ZBarProcessor : public Processor {
+class BarcodeDetectorProcessor : public Processor {
   public:
     cv::Mat operator()(cv::Mat);
   private:
     static void createOutput(cv::Mat&, cv::Mat&);
 };
 
-cv::Mat ZBarProcessor::operator()(cv::Mat im) {
+cv::Mat BarcodeDetectorProcessor::operator()(cv::Mat im) {
   cv::Mat grey;
   cv::cvtColor( im, grey, CV_BGR2GRAY );
   cv::Mat gradX;
@@ -55,12 +55,13 @@ cv::Mat ZBarProcessor::operator()(cv::Mat im) {
 
   // cv::drawContours( im, outContour, -1, cv::Scalar(0,255,0), 3);
 
+  // Display intermediate images for debugging
   // cv::Mat dest;
   // createOutput( closed, dest );
   return im; 
 }
 
-void ZBarProcessor::createOutput( cv::Mat& src, cv::Mat& dest )
+void BarcodeDetectorProcessor::createOutput( cv::Mat& src, cv::Mat& dest )
 {
   // Show intermediate images - need to expand CV_8UC1 to RGBA
   cv::Mat fullAlpha = cv::Mat( src.size(), CV_8UC1, cv::Scalar(255));
@@ -74,6 +75,6 @@ void ZBarProcessor::createOutput( cv::Mat& src, cv::Mat& dest )
 }
 
 namespace {
-  auto scProcReg = ProcessorRegister<ZBarProcessor>("Barcode Reader");
+  auto scProcReg = ProcessorRegister<BarcodeDetectorProcessor>("Barcode Detector");
 }
 
