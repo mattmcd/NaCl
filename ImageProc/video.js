@@ -3,12 +3,17 @@ var ImageProcModule = null;
 
 // Global status message
 var statusText = 'NO-STATUS';
-
 var lastClick = null;
 
 var isRunning = false;
+var isReadyToReceive = false;
 
-var samplePeriod = 200; // ms
+var samplePeriod = 20; // ms
+
+var startTime;
+var endTime;
+var averageFramePeriod = samplePeriod;
+var ewmaSmooth = 0.3;
 
 function pageDidLoad() {
   var video = document.getElementById("live");
@@ -45,7 +50,7 @@ function draw(v,c) {
 }
 
 function sendImage() {
-  if ( isRunning ) {
+  if ( isRunning && isReadyToReceive ) {
     // Get the current frame from canvas and send to NaCl
     var display = document.getElementById("display");
     var ctx = display.getContext( "2d" );
@@ -62,7 +67,11 @@ function sendImage() {
       height: height, 
       data: pixels.data.buffer, 
       processor: selectedProcessor };
+    startTime = performance.now();
     ImageProcModule.postMessage( cmd );
+    isReadyToReceive = false; // Don't send any more frames until ready
+  } else if (isRunning ) {
+    // Do nothing
   } else { 
     updateStatus( 'Stopped' );
   }
@@ -94,6 +103,7 @@ function moduleDidLoad() {
 
 function startSending() {
   isRunning = true;
+  isReadyToReceive = true;
   var go = document.getElementById( "go" );
   go.disabled = true;
   var stop = document.getElementById( "stop" );
@@ -103,6 +113,7 @@ function startSending() {
 
 function stopSending() {
   isRunning = false;
+  isReadyToReceive = false;
   var go = document.getElementById( "go" );
   go.disabled = false;
   var stop = document.getElementById( "stop" );
@@ -119,7 +130,11 @@ function handleMessage(message_event) {
     if ( res.Data ) {
       // updateStatus( "Received array buffer");
       // Display processed image    
+      endTime = performance.now();
+      averageFramePeriod = (1-ewmaSmooth)*averageFramePeriod + ewmaSmooth*(endTime-startTime);
+      updateStatus( 'Frame rate is ' + (averageFramePeriod).toFixed(1) + 'ms per frame' );
       drawImage( res.Data );
+      isReadyToReceive = true;
     } else {
       updateStatus( "Received something unexpected");
     }
@@ -128,7 +143,7 @@ function handleMessage(message_event) {
     //drawImage( res.Data );
   }
   if ( res.Type == "status" ) {
-    updateStatus( res.Message );
+    // updateStatus( res.Message ); 
   }
 }
 
