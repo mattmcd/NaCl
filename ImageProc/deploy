@@ -1,0 +1,6 @@
+#!/bin/bash
+sshfs $SERVER_ID:$SERVER_IMAGEPROC_LOC $SERVER_MOUNT
+echo Copying files to server
+cp $LOCAL_IMAGEPROC_LOC/{image_proc.pexe,image_proc.nmf,index.html,video.js} $SERVER_MOUNT
+echo Unmounting sshfs
+fusermount -u $SERVER_MOUNT
