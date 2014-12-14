@@ -8,7 +8,7 @@ var lastClick = null;
 var isRunning = false;
 var isReadyToReceive = false;
 
-var samplePeriod = 20; // ms
+var samplePeriod = 40; // ms
 
 var startTime;
 var endTime;
