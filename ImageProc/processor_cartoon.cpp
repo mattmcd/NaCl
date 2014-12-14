@@ -12,6 +12,9 @@ class CartoonProcessor : public Processor {
 cv::Mat CartoonProcessor::operator()(cv::Mat im) {
   cv::Mat grey;
   cv::cvtColor( im, grey, CV_BGR2GRAY );
+  // Get rid of speckle first by median filter
+  const int MEDIAN_KERNEL_SIZE = 9;
+  cv::medianBlur(grey, grey, MEDIAN_KERNEL_SIZE);
   cv::Mat gradX;
   cv::Scharr(grey, gradX, CV_32F, 1, 0);
   cv::Mat gradY;
@@ -24,7 +27,7 @@ cv::Mat CartoonProcessor::operator()(cv::Mat im) {
   cv::blur(gradient, blurred, cv::Size(9,9));
 
   cv::Mat thresh;
-  cv::threshold(gradient, thresh, 225, 255, cv::THRESH_BINARY_INV );
+  cv::threshold(gradient, thresh, 150, 255, cv::THRESH_BINARY_INV );
 
   // Display intermediate images for debugging
   cv::Mat dest;
