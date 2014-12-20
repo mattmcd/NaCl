@@ -15,13 +15,43 @@ var endTime;
 var averageFramePeriod = samplePeriod;
 var ewmaSmooth = 0.3;
 
-function pageDidLoad() {
+var videoSourceId;
+var selectedSource;
+
+function getVideoSources() {
+  // Populate list of video sources e.g. laptop camera and USB webcam
+  var videoSelect = document.querySelector("select#camera");
+  MediaStreamTrack.getSources( 
+    function( srcInfo ) {
+      videoSourceId = srcInfo
+        .filter( function(s) { return s.kind == "video"; } )
+        .map( function(s, ind) { 
+          // Set up list of cameras
+          var option = document.createElement( "option" );
+          option.text = "camera " + ind;
+          option.value= s.id;
+          videoSelect.appendChild( option );
+          return s.id; } );
+      selectedSource = videoSourceId[0];
+      setVideoInput();
+    } 
+  );
+  videoSelect.onchange = setVideoCb;
+}
+
+function setVideoCb () {
+  console.log("camera changed");
+  var videoSelect = document.querySelector("select#camera");
+  selectedSource = videoSelect.value;
+  setVideoInput();
+}
+
+function setVideoInput() {
   var video = document.getElementById("live");
-  var display = document.getElementById("display");
   var context = display.getContext("2d");
 
   navigator.webkitGetUserMedia(
-    {video:true, audio:false}, 
+    {video: { optional:[{sourceId : selectedSource}] }, audio:false}, 
     function (stream) {
       video.src = window.URL.createObjectURL(stream);
       draw( video, context);
@@ -29,7 +59,10 @@ function pageDidLoad() {
     function (err) {
       console.log("Unable to get media stream:" + err.Code );
     });
+}
 
+function pageDidLoad() {
+  getVideoSources();
   var listener = document.getElementById("listener");
   listener.addEventListener("load", moduleDidLoad, true );
   listener.addEventListener("message", handleMessage, true );
@@ -91,12 +124,13 @@ function moduleDidLoad() {
   ImageProcModule = document.getElementById( "image_proc" );
   updateStatus( "OK" );
   var go = document.getElementById( "go" );
-  // var modelList = document.getElementById( "model" );
+  var videoSelect = document.querySelector( "select#camera" );
   go.onclick = startSending;
   var stop = document.getElementById( "stop" );
   stop.onclick = stopSending;
   stop.disabled = true;
 
+  videoSelect.hidden = false;
   stop.hidden = false;
   go.hidden = false;
 }
