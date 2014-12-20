@@ -23,6 +23,11 @@ PROC_OBJECTS := $(PROCESSORS:.cpp=.bc)
 # Declare the ALL target first, to make the 'all' target the default build
 all: image_proc.pexe
 
+# Create individual test
+test:
+	g++ -g -o test_display test_display.cpp $(PROC) -std=c++0x -lopencv_highgui $(LDFLAGS)
+
+
 test_processor: test_processor.cpp singleton_factory.hpp $(PROCESSORS)
 	g++ -g -o test_processor test_processor.cpp $(PROCESSORS) -std=c++0x $(LDFLAGS)
 
