@@ -29,10 +29,15 @@ int main(int argc, char* argv[])
   
   cv::cvtColor( output, output, CV_RGBA2BGR );
   
-  cv::namedWindow( "Input", CV_WINDOW_AUTOSIZE );
-  cv::namedWindow( "Processed", CV_WINDOW_AUTOSIZE );
-  cv::imshow( "Input", input);
-  cv::imshow( "Processed", output);
+  cv::namedWindow( "Input and Processed", CV_WINDOW_AUTOSIZE );
+  // Create large image showing original and processed side by side
+  cv::Mat combined(input.rows, input.cols + output.cols, input.type());
+  cv::Mat roiLeft = combined(cv::Rect(0,0,input.cols,input.rows));
+  cv::Mat roiRight = combined(cv::Rect(input.cols,0,output.cols,output.rows));
+  input.copyTo( roiLeft );
+  output.copyTo( roiRight );
+  cv::imshow( "Input and Processed", combined);
+  cv::moveWindow( "Input and Processed", 100, 100 );
   cv::waitKey();
 
   return 0;
