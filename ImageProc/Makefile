@@ -39,7 +39,7 @@ clean:
 #$(PROC_OBJECTS): $(PROCESSORS) singleton_factory.hpp
 #	$(PNACL_CXX) -o $@ $< -O2 $(CXXFLAGS) $(LDFLAGS)
 
-image_proc.bc:  $(IMPROC_HEADERS) $(PROCESSORS)
+image_proc.bc:  $(IMPROC_HEADERS) $(PROCESSORS) url_loader_handler.cpp
 	$(PNACL_CXX) -o $@ $< $(PROCESSORS) url_loader_handler.cpp -O2 $(PNACL_CXXFLAGS) $(PNACL_LDFLAGS)
 
 image_proc.pexe: image_proc.bc

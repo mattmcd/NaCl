@@ -22,6 +22,7 @@ Rough plan for next few commits:
 - [x] Get the [Detecting
   Barcodes](http://www.pyimagesearch.com/2014/11/24/detecting-barcodes-images-python-opencv) demo working.
 - [x] Simple cartoon filter.
+- [x] Face detection.
 
 [Try it out!](http://www.matt-mcdonnell.com/code/NaCl/ImageProc/index.html) - you may need 
 to clear the cache to see any updates.  To do this open Chrome Developer Tools (Ctrl-Shift-i or F12), 

@@ -9,6 +9,8 @@
 #include "ppapi/cpp/module.h"
 #include "ppapi/cpp/var.h"
 #include "ppapi/cpp/var_dictionary.h"
+#include "ppapi/cpp/file_io.h"
+#include "ppapi/cpp/file_ref.h"
 
 #include "url_loader_handler.hpp"
 
@@ -163,10 +165,9 @@ void URLLoaderHandler::ReportResult(const std::string& fname,
   fflush(stdout);
   if (instance_) {
     pp::VarDictionary msg;
-    msg.Set( "Type", "status" );
+    msg.Set( "Type", "resource_loaded" );
     msg.Set( "Message", status );
+    msg.Set( "Data", text );
     instance_->PostMessage( msg );
-    // pp::Var var_result(fname + "\n" + text);
-    // instance_->PostMessage(var_result);
   }
 }

@@ -84,7 +84,7 @@ function draw(v,c) {
 
 function loadResource(url) {
   var cmd = { cmd: "load",  
-    url: "haarcascade_frontalface_alt.xml" };
+    url: "lbpcascade_frontalface.xml" };
   ImageProcModule.postMessage( cmd );
 }
 
@@ -183,6 +183,9 @@ function handleMessage(message_event) {
     //drawImage( res.Data );
   }
   if ( res.Type == "status" ) {
+    // updateStatus( res.Message ); 
+  }
+  if ( res.Type == "resource_loaded" ) {
     updateStatus( res.Message ); 
   }
 }
