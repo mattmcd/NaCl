@@ -82,6 +82,12 @@ function draw(v,c) {
   setTimeout( draw, samplePeriod, v, c);
 }
 
+function loadResource(url) {
+  var cmd = { cmd: "load",  
+    url: "haarcascade_frontalface_alt.xml" };
+  ImageProcModule.postMessage( cmd );
+}
+
 function sendImage() {
   if ( isRunning && isReadyToReceive ) {
     // Get the current frame from canvas and send to NaCl
@@ -177,7 +183,7 @@ function handleMessage(message_event) {
     //drawImage( res.Data );
   }
   if ( res.Type == "status" ) {
-    // updateStatus( res.Message ); 
+    updateStatus( res.Message ); 
   }
 }
 

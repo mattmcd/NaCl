@@ -1,5 +1,6 @@
 #include "improc_instance.hpp"
 #include "singleton_factory.hpp"
+#include "url_loader_handler.hpp"
 #include <vector>
 #include <thread>
 #include <functional>
@@ -77,6 +78,16 @@ void ImageProcInstance::HandleMessage( const pp::Var& var_message )
       msg.Set( "Type", "completed" );
       msg.Set( "Data", data );
       PostMessage( msg );
+  } else if ( cmd == "load" ) {
+    // Load resource URL
+    auto url = var_dict.Get( "url" ).AsString();
+    URLLoaderHandler* handler = URLLoaderHandler::Create(this, url);
+    if (handler != NULL) {
+      // Starts asynchronous download. When download is finished or when an
+      // error occurs, |handler| posts the results back to the browser
+      // vis PostMessage and self-destroys.
+      handler->Start();
+    }
   } else {
     // Disable simulation - background thread will see this at start of
     // next iteration and terminate early
