@@ -7,6 +7,8 @@
 class FaceDetectorProcessor : public Processor {
   public:
     cv::Mat operator()(cv::Mat);
+    FaceDetectorProcessor();
+    virtual ~FaceDetectorProcessor(){};
   private:
     cv::CascadeClassifier face_cascade;
     bool xmlLoaded;
@@ -14,19 +16,20 @@ class FaceDetectorProcessor : public Processor {
     static std::string getClassifier();
 };
 
+FaceDetectorProcessor::FaceDetectorProcessor() {
+  // Read the classifier definition from static function rather than
+  // file.  Simplifies NaCl infrastructure i.e. no nead for URLLoader and
+  // FileIO.
+  std::string str = FaceDetectorProcessor::getClassifier();
+  cv::FileStorage fs(str, cv::FileStorage::READ + cv::FileStorage::MEMORY );
+  auto fn = fs.getFirstTopLevelNode();
+  // NB: read method requires classifier to have been created from new traincascade
+  // application.  Haar classifiers in OpenCV examples don't seem to
+  // work.  
+  xmlLoaded = face_cascade.read(fn);
+}
+
 cv::Mat FaceDetectorProcessor::operator()(cv::Mat im) {
-  if (face_cascade.empty() ) {
-    // Read the classifier definition from static function rather than
-    // file.  Simplifies NaCl infrastructure i.e. no nead for URLLoader and
-    // FileIO.
-    std::string str = FaceDetectorProcessor::getClassifier();
-    cv::FileStorage fs(str, cv::FileStorage::READ + cv::FileStorage::MEMORY );
-    auto fn = fs.getFirstTopLevelNode();
-    // NB: read method requires classifier to have been created from new traincascade
-    // application.  Haar classifiers in OpenCV examples don't seem to
-    // work.  
-    xmlLoaded = face_cascade.read(fn);
-  }
   if (!xmlLoaded) 
     return im; // Early exit
 
