@@ -7,6 +7,7 @@ class Processor {
   public:
     virtual cv::Mat operator()(cv::Mat)=0;
     virtual ~Processor() {}
+    virtual void init( cv::Mat ) {};
 };
 
 #endif

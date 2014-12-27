@@ -25,6 +25,11 @@ int main(int argc, char* argv[])
   auto processorFactory = SingletonFactory<std::function<std::unique_ptr<Processor>()>>::getInstance();
   auto names = processorFactory.getNames();
   auto processor = processorFactory.getObject( names[0] )();
+  if ( names[0] == "Smiley!" ) {
+    cv::Mat smiley;
+    smiley = cv::imread( "smiley_200x200.png", CV_LOAD_IMAGE_UNCHANGED );
+    processor->init( smiley );
+  }
   auto output = (*processor)( im );
   
   cv::cvtColor( output, output, CV_RGBA2BGR );

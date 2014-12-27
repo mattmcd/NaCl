@@ -68,6 +68,17 @@ void ImageProcInstance::HandleMessage( const pp::Var& var_message )
     // SendStatus("Creating cv::Mat");
     auto Img = cv::Mat(height, width, CV_8UC4, byteData );
     // SendStatus("Calling processing");
+    
+    // Special case: Smiley
+    if ( selectedProcessor == "Smiley!" ) {
+      pp::VarDictionary sm_var_dict( var_dict.Get( "args" ));
+      auto sm_width  = sm_var_dict.Get("width").AsInt();
+      auto sm_height = sm_var_dict.Get("height").AsInt();
+      auto sm_data   = pp::VarArrayBuffer( sm_var_dict.Get("data") );
+      uint8_t* sm_byteData = static_cast<uint8_t*>(sm_data.Map());
+      auto sm_Img = cv::Mat(sm_height, sm_width, CV_8UC4, sm_byteData );
+      processor->init( sm_Img );
+    }
     Process( Img );
   } else if ( cmd == "test" ) {
     PostTest();

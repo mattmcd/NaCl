@@ -18,6 +18,8 @@ var ewmaSmooth = 0.3;
 var videoSourceId;
 var selectedSource;
 
+var imageData;
+
 function getVideoSources() {
   // Populate list of video sources e.g. laptop camera and USB webcam
   var videoSelect = document.querySelector("select#camera");
@@ -82,30 +84,40 @@ function draw(v,c) {
   setTimeout( draw, samplePeriod, v, c);
 }
 
-function loadResource(url) {
+function loadResource() {
   var cmd = { cmd: "load",  
-    url: "lbpcascade_frontalface.xml" };
+    url: "smiley_col.bmp" };
   ImageProcModule.postMessage( cmd );
+}
+
+function getImageData( id ) {
+  // Get image data from specified canvas
+  var display = document.getElementById(id);
+  var ctx = display.getContext( "2d" );
+  var height = display.height;
+  var width = display.width;
+  var nBytes = height * width * 4; 
+  var pixels = ctx.getImageData(0, 0, width, height);
+  var imData = { width: width, height: height, data: pixels.data.buffer };
+  return imData;
 }
 
 function sendImage() {
   if ( isRunning && isReadyToReceive ) {
     // Get the current frame from canvas and send to NaCl
-    var display = document.getElementById("display");
-    var ctx = display.getContext( "2d" );
-    var height = display.height;
-    var width = display.width;
-    var nBytes = height * width * 4; 
-    var pixels = ctx.getImageData(0, 0, width, height);
     // drawImage( pixels );
+    var imData = getImageData( "display" );
 
     var theCommand = "process"; //"echo"; // test, process
     var selectedProcessor = getSelectedProcessor();
     var cmd = { cmd: theCommand,  
-      width: width, 
-      height: height, 
-      data: pixels.data.buffer, 
+      width: imData.width, 
+      height: imData.height, 
+      data: imData.data, 
       processor: selectedProcessor };
+    if ( selectedProcessor === "Smiley!" ) {
+      cmd.args = getImageData("smiley_canvas");
+    }
     startTime = performance.now();
     ImageProcModule.postMessage( cmd );
     isReadyToReceive = false; // Don't send any more frames until ready
@@ -129,6 +141,14 @@ function drawImage(pixels){
 function moduleDidLoad() {
   ImageProcModule = document.getElementById( "image_proc" );
   updateStatus( "OK" );
+  // Load image resource
+  // loadResource();
+  var cv = document.getElementById( "smiley_canvas" );
+  var ctx = cv.getContext( "2d" );
+  var smiley = document.getElementById( "smiley" );
+  ctx.drawImage(smiley, 0, 0);
+  imageData = ctx.getImageData( 0, 0, smiley.width, smiley.height);
+
   var go = document.getElementById( "go" );
   var videoSelect = document.querySelector( "select#camera" );
   go.onclick = startSending;
@@ -186,7 +206,9 @@ function handleMessage(message_event) {
     // updateStatus( res.Message ); 
   }
   if ( res.Type == "resource_loaded" ) {
+    // Load image from server
     updateStatus( res.Message ); 
+    imageData = res.Data;
   }
 }
 
