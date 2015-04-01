@@ -37,9 +37,18 @@ they are fairly straight forward.
 
 1. Install [Depo Tools](http://dev.chromium.org/developers/how-tos/install-depot-tools).
 2. [Check out the NaCl Ports](https://code.google.com/p/naclports/wiki/HowTo_Checkout).
-2. Follow the [Install guide for SDL](https://code.google.com/p/naclports/wiki/InstallingSDL),
+2. ~~Follow the [Install guide for SDL](https://code.google.com/p/naclports/wiki/InstallingSDL),
    replacing __sdl__ with __opencv__ and choosing pnacl as the architecture to
-   build.  The build itself took about 15 minutes on my Intel i3 dual core laptop.
+   build.~~
+   Seems like the original instructions have been deleted, and didn't cover
+   which branch to use in any event.  cd to the dir where you've checked
+   out nacl_ports (for me ~/Work/ExternCode/nacl_ports/src ) with depotools
+   then change to the branch that matches NACL_SDK_ROOT
+
+    git checkout pepper_40 
+    NACL_ARCH=pnacl make opencv
+
+   The build itself took about 15 minutes on my Intel i3 dual core laptop.
 3. Add the opencv libraries and zlib to the build arguments:
 
     LDFLAGS := -L$(NACL_SDK_ROOT)/lib/pnacl/Release -lppapi_cpp -lppapi -lopencv_core -lz
