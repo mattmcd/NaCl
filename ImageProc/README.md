@@ -45,7 +45,7 @@ they are fairly straight forward.
    out nacl_ports (for me ~/Work/ExternCode/nacl_ports/src ) with depotools
    then change to the branch that matches NACL_SDK_ROOT
 
-    git checkout pepper_40 
+    git checkout pepper_40 <br>
     NACL_ARCH=pnacl make opencv
 
    The build itself took about 15 minutes on my Intel i3 dual core laptop.
