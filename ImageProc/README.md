@@ -49,9 +49,32 @@ they are fairly straight forward.
     NACL_ARCH=pnacl make opencv
 
    The build itself took about 15 minutes on my Intel i3 dual core laptop.
+
 3. Add the opencv libraries and zlib to the build arguments:
 
     LDFLAGS := -L$(NACL_SDK_ROOT)/lib/pnacl/Release -lppapi_cpp -lppapi -lopencv_core -lz
+
+Updating NaCl and NaCl Ports
+----------------------------
+NaCl updates on around the same release cycle as the Chrome browser.
+Chrome itself is backwards compatible but it's still a good idea to keep
+roughly up to date.
+
+Here we assume that the NaCl SDK has been installed in NACL_ROOT
+(NACL_SDK_ROOT will be under this), and NaCl ports has been installed in
+PORTS_ROOT.  On my machine these are ~/Work/ExternCode/nacl_sdk and
+~/Work/ExternCode/nacl_ports respectively.
+
+1. Update NaCl SDK
+   - cd NACL_ROOT
+   - ./naclsdk update
+2. Update NACL_SDK_ROOT environment variable e.g. NACL_ROOT/pepper_41
+3. Update ports
+   - cd PORTS_ROOT
+   - cd src
+   - checkout -b pepper_41 origin/pepper_41
+   - gclient sync
+   - (If that fails, cd .. vim .gclient and set managed=False)
 
 LICENSE
 -------
