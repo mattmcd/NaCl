@@ -72,7 +72,7 @@ PORTS_ROOT.  On my machine these are ~/Work/ExternCode/nacl_sdk and
 3. Update ports
    - cd PORTS_ROOT
    - cd src
-   - checkout -b pepper_41 origin/pepper_41
+   - git checkout -b pepper_41 origin/pepper_41
    - gclient sync
    - (If that fails, cd .. vim .gclient and set managed=False)
 
