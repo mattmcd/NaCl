@@ -1,0 +1,8 @@
+{ "program" : 
+  { "portable" : 
+    { "pnacl-translate" : 
+      { "url" : "simple_template.pexe"
+      } 
+    }
+  }
+}

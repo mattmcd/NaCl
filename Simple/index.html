@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<!--
+Copyright (c) 2012 The Chromium Authors. All rights reserved.
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file.
+-->
+<head>
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="-1">
+  <title>PPAPI Simple Template</title>
+  <script type="text/javascript" src="common.js"></script>
+  <script type="text/javascript" src="example.js"></script>
+</head>
+<body data-name="simple_template" data-tools="pnacl newlib glibc linux" data-configs="Debug Release" data-path="" data-attrs="PS_STDOUT=dev/tty PS_TTY_PREFIX=tty: PS_EXIT_MESSAGE=exit">
+  <h1>PPAPI Simple Template</h1>
+  <p>Simple template for communication between front end and NaCl backend
+  using PPAPI Simple library.  This example is a cut down combination of
+  demos/voronoi and tutorials/using_simple_ppapi in the NaCl SDK examples.
+  <h2>Status: <code id="statusField">NO-STATUS</code></h2>
+
+  <button id="go">Go!</button>
+  <button id="quit">Quit</button>
+  <!-- The NaCl plugin will be embedded inside the element with id "listener".
+      See common.js.-->
+  <h2>Output:</h2>
+  <pre id="log" style="font-weight:bold"></pre>
+  <div id="listener"></div>
+</body>
+</html>
