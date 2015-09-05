@@ -24,7 +24,7 @@ Rough plan for next few commits:
 - [x] Simple cartoon filter.
 - [x] Face detection.
 
-[Try it out!](http://www.matt-mcdonnell.com/code/NaCl/ImageProc/index.html) - you may need 
+[Try it out!](https://www.matt-mcdonnell.com/code/NaCl/ImageProc/index.html) - you may need 
 to clear the cache to see any updates.  To do this open Chrome Developer Tools (Ctrl-Shift-i or F12), 
 then click and hold Reload, choose "Empty Cache and Hard Reload" from the popup menu.  Popup menu may
 only appear if you have a cached page i.e. have previously visited.
