@@ -8,63 +8,23 @@ var lastClick = null;
 var isRunning = false;
 var isReadyToReceive = false;
 
-var samplePeriod = 40; // ms
-
 var startTime;
 var endTime;
-var averageFramePeriod = samplePeriod;
+var averageFramePeriod;
 var ewmaSmooth = 0.3;
 
 var videoSourceId;
 var selectedSource;
 
 var imageData;
+var cachedSmiley;
 
-function getVideoSources() {
-  // Populate list of video sources e.g. laptop camera and USB webcam
-  var videoSelect = document.querySelector("select#camera");
-  MediaStreamTrack.getSources( 
-    function( srcInfo ) {
-      videoSourceId = srcInfo
-        .filter( function(s) { return s.kind == "video"; } )
-        .map( function(s, ind) { 
-          // Set up list of cameras
-          var option = document.createElement( "option" );
-          option.text = "camera " + ind;
-          option.value= s.id;
-          videoSelect.appendChild( option );
-          return s.id; } );
-      selectedSource = videoSourceId[0];
-      setVideoInput();
-    } 
-  );
-  videoSelect.onchange = setVideoCb;
-}
-
-function setVideoCb () {
-  console.log("camera changed");
-  var videoSelect = document.querySelector("select#camera");
-  selectedSource = videoSelect.value;
-  setVideoInput();
-}
-
-function setVideoInput() {
-  var video = document.getElementById("live");
-  var context = display.getContext("2d");
-
-  navigator.webkitGetUserMedia(
-    {video: { optional:[{sourceId : selectedSource}] }, audio:false}, 
-    function (stream) {
-      video.src = window.URL.createObjectURL(stream);
-      draw( video, context);
-    },
-    function (err) {
-      console.log("Unable to get media stream:" + err.Code );
-    });
-}
+var view;
 
 function pageDidLoad() {
-  getVideoSources();
+  var src = make_image_source();
+  view = make_image_source_view(src);
+  view.init("live", "display", "camera"); 
   var listener = document.getElementById("listener");
   listener.addEventListener("load", moduleDidLoad, true );
   listener.addEventListener("message", handleMessage, true );
@@ -79,34 +39,17 @@ function pageDidLoad() {
   go.addEventListener("onclick", sendImage );
 }
 
-function draw(v,c) {
-  c.drawImage(v, 0, 0);
-  setTimeout( draw, samplePeriod, v, c);
-}
-
 function loadResource() {
   var cmd = { cmd: "load",  
     url: "smiley_col.bmp" };
   ImageProcModule.postMessage( cmd );
 }
 
-function getImageData( id ) {
-  // Get image data from specified canvas
-  var display = document.getElementById(id);
-  var ctx = display.getContext( "2d" );
-  var height = display.height;
-  var width = display.width;
-  var nBytes = height * width * 4; 
-  var pixels = ctx.getImageData(0, 0, width, height);
-  var imData = { width: width, height: height, data: pixels.data.buffer };
-  return imData;
-}
-
 function sendImage() {
   if ( isRunning && isReadyToReceive ) {
     // Get the current frame from canvas and send to NaCl
     // drawImage( pixels );
-    var imData = getImageData( "display" );
+    var imData = view.getImageData();
 
     var theCommand = "process"; //"echo"; // test, process
     var selectedProcessor = getSelectedProcessor();
@@ -116,7 +59,7 @@ function sendImage() {
       data: imData.data, 
       processor: selectedProcessor };
     if ( selectedProcessor === "Smiley!" ) {
-      cmd.args = getImageData("smiley_canvas");
+      cmd.args = cachedSmiley;
     }
     startTime = performance.now();
     ImageProcModule.postMessage( cmd );
@@ -126,7 +69,7 @@ function sendImage() {
   } else { 
     updateStatus( 'Stopped' );
   }
-  setTimeout( sendImage, samplePeriod );
+  setTimeout( sendImage, view.getSamplePeriod() );
 }
 
 function drawImage(pixels){
@@ -148,6 +91,7 @@ function moduleDidLoad() {
   var smiley = document.getElementById( "smiley" );
   ctx.drawImage(smiley, 0, 0);
   imageData = ctx.getImageData( 0, 0, smiley.width, smiley.height);
+  cachedSmiley = view.getImageData("smiley_canvas");
 
   var go = document.getElementById( "go" );
   var videoSelect = document.querySelector( "select#camera" );
@@ -156,9 +100,30 @@ function moduleDidLoad() {
   stop.onclick = stopSending;
   stop.disabled = true;
 
+  var stream = document.getElementById("stream");
+  stream.onclick = toggleStream;
+  stream.value = "On";
+  stream.textContent = stream.value;
+  stream.hidden = false;
+
   videoSelect.hidden = false;
   stop.hidden = false;
   go.hidden = false;
+}
+
+function toggleStream() {
+  // Toggle input video stream on/off
+  var stream = document.getElementById("stream");
+  if (stream.value === 'On') {
+    // Stop camera
+    stream.value = 'Off';
+    view.stop();
+  } else {
+    // Start camera
+    stream.value = 'On';
+    view.start();
+  }
+  stream.textContent = stream.value;
 }
 
 function startSending() {
@@ -191,6 +156,9 @@ function handleMessage(message_event) {
       // updateStatus( "Received array buffer");
       // Display processed image    
       endTime = performance.now();
+      if (typeof averageFramePeriod === 'undefined' ) {
+        averageFramePeriod = view.getSamplePeriod();
+      }
       averageFramePeriod = (1-ewmaSmooth)*averageFramePeriod + ewmaSmooth*(endTime-startTime);
       updateStatus( 'Frame rate is ' + (averageFramePeriod).toFixed(1) + 'ms per frame' );
       drawImage( res.Data );

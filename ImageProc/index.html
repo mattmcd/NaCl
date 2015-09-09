@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>OpenCV in Chrome using NaCl</title>
+  <script type="text/javascript" src="video_img.js"></script>
   <script type="text/javascript" src="video.js"></script>
 </head>
 <body onLoad="pageDidLoad()">
@@ -20,6 +21,7 @@
   <p>Requires Chrome web browser version 44 or above (not Android app)</p>
 
   <select id="camera" hidden></select> 
+  <button id="stream" hidden></button> 
   <select id="processor" disabled hidden></select> 
   <button id="go" hidden>Go</button>
   <button id="stop" hidden>Stop</button>
