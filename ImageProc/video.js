@@ -34,9 +34,6 @@ function pageDidLoad() {
     updateStatus();
   }
 
-  // Set up inteface
-  var go = document.getElementById("go");
-  go.addEventListener("onclick", sendImage );
 }
 
 function loadResource() {
@@ -93,12 +90,8 @@ function moduleDidLoad() {
   imageData = ctx.getImageData( 0, 0, smiley.width, smiley.height);
   cachedSmiley = view.getImageData("smiley_canvas");
 
-  var go = document.getElementById( "go" );
-  var videoSelect = document.querySelector( "select#camera" );
-  go.onclick = startSending;
-  var stop = document.getElementById( "stop" );
-  stop.onclick = stopSending;
-  stop.disabled = true;
+  var run = document.getElementById( "run" );
+  run.onclick = toggleSending;
 
   var stream = document.getElementById("stream");
   stream.onclick = toggleStream;
@@ -106,9 +99,9 @@ function moduleDidLoad() {
   stream.textContent = stream.value;
   stream.hidden = false;
 
-  videoSelect.hidden = false;
-  stop.hidden = false;
-  go.hidden = false;
+  var camera = document.getElementById("camera")
+  camera.hidden = false;
+  run.hidden = false;
 }
 
 function toggleStream() {
@@ -126,23 +119,21 @@ function toggleStream() {
   stream.textContent = stream.value;
 }
 
-function startSending() {
-  isRunning = true;
-  isReadyToReceive = true;
-  var go = document.getElementById( "go" );
-  go.disabled = true;
-  var stop = document.getElementById( "stop" );
-  stop.disabled = false;
+function toggleSending() {
+  var run = document.getElementById( "run" );
+  if (isRunning) {
+    // Stop processing
+    isRunning = false;
+    isReadyToReceive = false;
+    run.value = "Go";
+  } else {
+    // Start processing
+    isRunning = true;
+    isReadyToReceive = true;
+    run.value = "Stop";
+  }
+  run.textContent = run.value;
   sendImage();
-}
-
-function stopSending() {
-  isRunning = false;
-  isReadyToReceive = false;
-  var go = document.getElementById( "go" );
-  go.disabled = false;
-  var stop = document.getElementById( "stop" );
-  stop.disabled = true;
 }
 
 function handleMessage(message_event) {
