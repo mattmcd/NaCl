@@ -25,6 +25,8 @@ function pageDidLoad() {
   var src = make_image_source();
   view = make_image_source_view(src);
   view.init("live", "display", "camera"); 
+  var camera = document.getElementById("camera");
+  camera.hidden = true;
   var listener = document.getElementById("listener");
   listener.addEventListener("load", moduleDidLoad, true );
   listener.addEventListener("message", handleMessage, true );

@@ -1,20 +1,9 @@
 #include "singleton_factory.hpp"
 #include "opencv2/objdetect/objdetect.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
+#include "processor_facedetect.hpp"
 #include <algorithm>
 #include <iostream>
-
-class FaceDetectorProcessor : public Processor {
-  public:
-    cv::Mat operator()(cv::Mat);
-    FaceDetectorProcessor();
-    virtual ~FaceDetectorProcessor(){};
-  private:
-    cv::CascadeClassifier face_cascade;
-    bool xmlLoaded;
-    static void createOutput(cv::Mat&, cv::Mat&);
-    static std::string getClassifier();
-};
 
 FaceDetectorProcessor::FaceDetectorProcessor() {
   // Read the classifier definition from static function rather than
@@ -29,20 +18,25 @@ FaceDetectorProcessor::FaceDetectorProcessor() {
   xmlLoaded = face_cascade.read(fn);
 }
 
+void FaceDetectorProcessor::detectFaces(const cv::Mat im, std::vector<cv::Rect>& faces) {
+  cv::Mat grey;
+  cv::cvtColor( im, grey, CV_BGR2GRAY );
+  cv::equalizeHist( grey, grey );
+
+  face_cascade.detectMultiScale( grey, faces, 1.1, 2, 
+      0 | CV_HAAR_SCALE_IMAGE, cv::Size(30,30));
+}
+
 cv::Mat FaceDetectorProcessor::operator()(cv::Mat im) {
   if (!xmlLoaded) 
     return im; // Early exit
 
   // FaceDetector segmentation demo from the OpenCV documentation
-  cv::Mat grey;
   cv::cvtColor( im, im, CV_RGBA2BGR );
-  cv::cvtColor( im, grey, CV_BGR2GRAY );
-  cv::equalizeHist( grey, grey );
-
+  
   std::vector<cv::Rect> faces;
-  face_cascade.detectMultiScale( grey, faces, 1.1, 2, 
-      0 | CV_HAAR_SCALE_IMAGE, cv::Size(30,30));
-
+  detectFaces(im, faces);
+  
   for ( size_t i=0; i < faces.size(); i++ ) {
     cv::rectangle( im, faces[i], cv::Scalar(0,255,0), 2);
   }
