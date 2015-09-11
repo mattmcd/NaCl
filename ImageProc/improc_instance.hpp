@@ -39,7 +39,7 @@ class ImageProcInstance : public pp::Instance {
     void Version( int32_t ) {
       pp::VarDictionary msg;
       msg.Set( "Type", "version" );
-      msg.Set( "Version", "Image Processor 0.4" );
+      msg.Set( "Version", "Image Processor 0.4.1" );
       // Get processor
       auto processorFactory = SingletonFactory<std::function<std::unique_ptr<Processor>()>>::getInstance();
       auto processorList = processorFactory.getNames();
