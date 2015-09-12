@@ -34,16 +34,6 @@ cv::Mat LaplacianProcessor::operator()(cv::Mat im) {
   cv::Mat dest;
   createOutput( absLap, dest );
   return dest; 
-
-  /* 
-  cv::Mat segmented, gray, edges, edgesBgr;
-  cv::pyrMeanShiftFiltering(im, segmented, 15, 40);
-  cv::cvtColor(segmented, gray, CV_BGR2GRAY);
-  cv::Canny(gray, edges, 150, 150);
-  cv::cvtColor(edges, edgesBgr, CV_GRAY2BGR);
-  cv::Mat result = segmented - edgesBgr;
-  return result;
-  */
 }
 
 void LaplacianProcessor::createOutput( cv::Mat& src, cv::Mat& dest )
