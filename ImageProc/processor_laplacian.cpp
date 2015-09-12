@@ -2,42 +2,37 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include <algorithm>
 
-// OpenCV Sobel Derivative example from doc
-// http://docs.opencv.org/doc/tutorials/imgtrans/sobel_derivatives/sobel_derivaties.html
-class SobelProcessor : public Processor {
+// OpenCV Laplacian Derivative example from doc
+// http://docs.opencv.org/doc/tutorials/imgtrans/laplace_operator/laplace_operator.html
+class LaplacianProcessor : public Processor {
   public:
     cv::Mat operator()(cv::Mat);
   private:
     static void createOutput(cv::Mat&, cv::Mat&);
 };
 
-cv::Mat SobelProcessor::operator()(cv::Mat im) {
+cv::Mat LaplacianProcessor::operator()(cv::Mat im) {
  
   cv::Mat grey;
   // Remove noise by blurring with Gaussian
   cv::GaussianBlur(im, im, cv::Size(3,3), 0,0, cv::BORDER_DEFAULT);
   cv::cvtColor( im, grey, CV_BGR2GRAY );
   
+  int kernel_size = 3;
   int scale = 1;
   int delta = 0;
   int ddepth = CV_16S;
-  cv::Mat gradX;
-  cv::Sobel(grey, gradX, ddepth, 1, 0, 3, scale, delta, cv::BORDER_DEFAULT);
-  cv::Mat gradY;
-  cv::Sobel(grey, gradY, ddepth, 0, 1, 3, scale, delta, cv::BORDER_DEFAULT);
+  cv::Mat lap;
+  cv::Laplacian(grey, lap, ddepth, kernel_size, scale, delta, cv::BORDER_DEFAULT);
 
-  // Scaled abs gradients
-  cv::Mat absGradX, absGradY;
+  // Scaled abs laplacian
+  cv::Mat absLap;
 
-  cv::convertScaleAbs(gradX, absGradX);
-  cv::convertScaleAbs(gradY, absGradY);
-
-  cv::Mat gradient;
-  cv::addWeighted(absGradX, 0.5, absGradY, 0.5, 0, gradient);
+  cv::convertScaleAbs(lap, absLap);
 
   // Display intermediate images for debugging
   cv::Mat dest;
-  createOutput( gradient, dest );
+  createOutput( absLap, dest );
   return dest; 
 
   /* 
@@ -51,7 +46,7 @@ cv::Mat SobelProcessor::operator()(cv::Mat im) {
   */
 }
 
-void SobelProcessor::createOutput( cv::Mat& src, cv::Mat& dest )
+void LaplacianProcessor::createOutput( cv::Mat& src, cv::Mat& dest )
 {
   // Show intermediate images - need to expand CV_8UC1 to RGBA
   cv::Mat fullAlpha = cv::Mat( src.size(), CV_8UC1, cv::Scalar(255));
@@ -65,6 +60,6 @@ void SobelProcessor::createOutput( cv::Mat& src, cv::Mat& dest )
 }
 
 namespace {
-  auto scProcReg = ProcessorRegister<SobelProcessor>("Sobel Derivative");
+  auto scProcReg = ProcessorRegister<LaplacianProcessor>("Laplacian");
 }
 
