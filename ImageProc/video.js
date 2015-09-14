@@ -21,6 +21,9 @@ var cachedSmiley;
 
 var view;
 
+// Parameters for current processor
+var parameters;
+
 function pageDidLoad() {
   var src = make_image_source();
   view = make_image_source_view(src);
@@ -59,6 +62,8 @@ function sendImage() {
       processor: selectedProcessor };
     if ( selectedProcessor === "Smiley!" ) {
       cmd.args = cachedSmiley;
+    } else if ( parameters ) {
+      cmd.args = JSON.stringify( parameters );
     }
     startTime = performance.now();
     ImageProcModule.postMessage( cmd );
@@ -158,6 +163,11 @@ function handleMessage(message_event) {
       isReadyToReceive = true;
     } else {
       updateStatus( "Received something unexpected");
+    }
+    if ( res.Parameters ) {
+      parameters = JSON.parse( res.Parameters );
+    } else {
+      parameters = "";
     }
 
     // Display processed image    

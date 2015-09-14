@@ -1,15 +1,34 @@
 #include "singleton_factory.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
-#include <iostream>
+#include "include/rapidjson/document.h"
+#include <sstream>
 
 class GBlurProcessor : public Processor {
   public:
     GBlurProcessor() : level(4) {};
     GBlurProcessor(int level_) : level(level_) {};
     cv::Mat operator()(cv::Mat);
+    void init(const char* json);
+    std::string getParameters();
   private:
     int level;
 };
+
+void GBlurProcessor::init(const char* json) {
+  // Read json string to set properties
+  using namespace rapidjson;
+  Document document;
+  document.Parse(json);
+  assert(document.IsObject());
+  assert(document.HasMember("level"));
+  level = document["level"].GetInt();
+}
+
+std::string GBlurProcessor::getParameters() {
+  std::ostringstream os;
+  os <<  "{\"level\":" << level << "}";
+  return os.str();
+}
 
 cv::Mat GBlurProcessor::operator()(cv::Mat im) {
   cv::Mat dest;

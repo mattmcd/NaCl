@@ -1,5 +1,5 @@
 # Project Build flags
-WARNINGS := -Wno-long-long -Wall -Wswitch-enum -pedantic -Werror
+WARNINGS := -Wno-long-long -Wall -pedantic -Werror # -Wswitch-enum -pedantic -Werror
 CXXFLAGS := -pthread -std=gnu++11 $(WARNINGS)
 
 #

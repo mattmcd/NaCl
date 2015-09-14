@@ -21,6 +21,7 @@ void ImageProcInstance::Process( cv::Mat im)
 
   msg.Set( "Type", "completed" );
   msg.Set( "Data", data );
+  msg.Set( "Parameters", processor->getParameters());
   PostMessage( msg );
 }
 
@@ -53,9 +54,11 @@ void ImageProcInstance::HandleMessage( const pp::Var& var_message )
     auto height = var_dict.Get("height").AsInt();
     auto data   = pp::VarArrayBuffer( var_dict.Get("data") );
     auto selectedProcessor = var_dict.Get("processor").AsString();
-    if ( selectedProcessor != processorName ) {
+    bool newProcessor = selectedProcessor != processorName;
+    if ( newProcessor ) {
       SendStatus("Creating processor factory");
-      auto processorFactory = SingletonFactory<std::function<std::unique_ptr<Processor>()>>::getInstance();
+      auto processorFactory = SingletonFactory<
+        std::function<std::unique_ptr<Processor>()> >::getInstance();
       SendStatus("Creating processor");
       processor = processorFactory.getObject( selectedProcessor )();
       processorName = selectedProcessor;
@@ -70,7 +73,9 @@ void ImageProcInstance::HandleMessage( const pp::Var& var_message )
     // SendStatus("Calling processing");
     
     // Special case: Smiley
-    if ( selectedProcessor == "Smiley!" ) {
+    if ( (selectedProcessor == "Smiley!") && newProcessor ) {
+      // Only send the image data for overlay on the first time we change
+      // processor
       pp::VarDictionary sm_var_dict( var_dict.Get( "args" ));
       auto sm_width  = sm_var_dict.Get("width").AsInt();
       auto sm_height = sm_var_dict.Get("height").AsInt();
@@ -78,6 +83,10 @@ void ImageProcInstance::HandleMessage( const pp::Var& var_message )
       uint8_t* sm_byteData = static_cast<uint8_t*>(sm_data.Map());
       auto sm_Img = cv::Mat(sm_height, sm_width, CV_8UC4, sm_byteData );
       processor->init( sm_Img );
+    } else if ( var_dict.HasKey( "args" ) ) {
+      // Args key is json string that processor will parse
+      auto json = var_dict.Get("args").AsString();
+      processor->init( json.c_str() );
     }
     Process( Img );
   } else if ( cmd == "test" ) {
