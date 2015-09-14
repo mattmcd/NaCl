@@ -1,6 +1,7 @@
 #include "singleton_factory.hpp"
 #include <iostream>
 #include <string>
+#include <algorithm>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
@@ -31,12 +32,14 @@ int main(int argc, char* argv[])
     processor->init( smiley );
   }
   auto output = (*processor)( im );
-  
+  std::cout << "In: " << input.cols<< "x" << input.rows << " "
+            << "Out: " << output.cols << "x" << output.rows << std::endl;
   cv::cvtColor( output, output, CV_RGBA2BGR );
   
   cv::namedWindow( "Input and Processed", CV_WINDOW_AUTOSIZE );
   // Create large image showing original and processed side by side
-  cv::Mat combined(input.rows, input.cols + output.cols, input.type());
+  cv::Mat combined(std::max(input.rows,output.rows), 
+    input.cols + output.cols, input.type());
   cv::Mat roiLeft = combined(cv::Rect(0,0,input.cols,input.rows));
   cv::Mat roiRight = combined(cv::Rect(input.cols,0,output.cols,output.rows));
   input.copyTo( roiLeft );

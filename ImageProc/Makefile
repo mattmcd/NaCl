@@ -26,10 +26,11 @@ IMPROC_HEADERS := image_proc.cpp image_proc.hpp instance_factory.hpp improc_inst
 all: image_proc.pexe
 
 # Create individual test
+.PHONY: test
 test:
 	g++ -g -o test_display test_display.cpp $(PROC) -std=c++0x -lopencv_highgui $(LDFLAGS)
 
-
+.PHONY: test_processor
 test_processor: test_processor.cpp singleton_factory.hpp $(PROCESSORS)
 	g++ -g -o test_processor test_processor.cpp $(PROCESSORS) -std=c++0x $(LDFLAGS)
 
