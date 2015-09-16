@@ -16,7 +16,11 @@ class EyeTrackProcessor : public Processor {
     std::string getParameters();
   private:
     void drawBorder( cv::Mat );
-    void calcGradient( cv::Mat );
+    void drawGradient( cv::Mat );
+    cv::Mat calcGradient( const cv::Mat& );
+    cv::Mat calcGradientMagnitude( const cv::Mat& );
+    cv::Mat thresholdGradient( cv::Mat );
+    cv::Mat calcObjective( cv::Mat );
     cv::Rect getRightEyeRoI( const cv::Mat&);
     cv::Rect getLeftEyeRoI( const cv::Mat&);
     static void createOutput(cv::Mat&, cv::Mat&);
@@ -24,11 +28,11 @@ class EyeTrackProcessor : public Processor {
     static void printDim( const std::string&, const cv::Mat&);
     std::unique_ptr<FaceDetectorProcessor> innerFaceDetector;
     // Parameters for eye location in units of face width,height
-    double eyeWidth = 0.3;
-    double eyeHeight = 0.3;
-    double eyeX0 = 0.15;
-    double eyeY0 = 0.25;
-    int useQuantile = 0;
+    double eyeWidth = 0.2;
+    double eyeHeight = 0.2;
+    double eyeX0 = 0.2;
+    double eyeY0 = 0.3;
+    int useQuantile = 1;
     double gradThreshQuantile = 0.75;
     double gradThreshStdScale = 0.5;
     int ksize = CV_SCHARR;
@@ -80,8 +84,8 @@ cv::Mat EyeTrackProcessor::operator()(cv::Mat im) {
     // Person left eye (camera right)
     cv::Rect leftEye = getLeftEyeRoI(imFace);
 
-    calcGradient(imFace(rightEye));
-    calcGradient(imFace(leftEye));
+    drawGradient(imFace(rightEye));
+    drawGradient(imFace(leftEye));
     
     drawBorder(imFace(rightEye));
     drawBorder(imFace(leftEye));
@@ -99,7 +103,103 @@ void EyeTrackProcessor::drawBorder( cv::Mat im){
     cv::rectangle( im, border, cv::Scalar(0,255,0), 1);
 }
 
-void EyeTrackProcessor::calcGradient( cv::Mat im) {
+void EyeTrackProcessor::drawGradient( cv::Mat im ) {
+  // Calculate mean dot product of displacement vector and gradient
+  cv::Mat objective;
+  objective = calcObjective( im );
+  
+  
+  double minVal;
+  double maxVal;
+  cv::Point maxLoc;
+  cv::Mat objectiveAbs;
+  cv::minMaxLoc( objective, &minVal, &maxVal, NULL, &maxLoc);
+
+  cv::Mat dest( objective.size(), CV_8UC3);
+
+  cv::cvtColor( objective, dest, CV_GRAY2BGR);
+  dest.copyTo(im);
+  cv::circle(im, maxLoc, 3, cv::Scalar(0,255,0), -1);
+}
+
+cv::Mat EyeTrackProcessor::calcObjective( cv::Mat im ) {
+  // Calculate gradient as double 
+  cv::Mat grad;
+  grad = calcGradient( im );
+  
+  // Calculate magnitude of gradient as double
+  cv::Mat gradMag;
+  gradMag = calcGradientMagnitude( grad );
+
+  // Convert to 8UC1 and threshold
+  cv::Mat gradient;
+  gradient = thresholdGradient( gradMag );
+  // return gradient;
+
+  int nRows = grad.rows;
+  int nCols = grad.cols;
+  int nEl   = nRows * nCols;
+  grad = grad.reshape(1, nEl );
+  gradMag = gradMag.reshape( 1, nEl );
+  gradient = gradient.reshape( 1, nEl );
+  std::vector<cv::Point2d> gradVect;
+  for (int i=0; i<grad.rows; i++ ) {
+    if (  gradient.at<double>(i) == 0 ) {
+      // Zero gradient
+      gradVect.push_back( cv::Point2d(0, 0));
+    } else {
+      // Scale to unit vector
+      gradVect.push_back( cv::Point2d( grad.at<double>(i,0), grad.at<double>(i,1))
+        * (1/gradMag.at<double>(i)));
+    }
+  }
+
+  std::vector<cv::Point2d> dispVect;
+  for (int i=0; i<nRows; i++ ) {
+    for (int j=0; j<nCols; j++) {
+      dispVect.push_back( cv::Point2d(j,i));
+    }
+  }
+
+  cv::Mat imC;
+  im.copyTo(imC);
+  cv::GaussianBlur(imC, imC, cv::Size(3,3), 0,0, cv::BORDER_DEFAULT);
+  cv::Mat grey(imC.size(), CV_8UC1);
+  cv::cvtColor( imC, grey, CV_BGR2GRAY);
+  grey = grey.reshape( 1, nEl);
+
+  cv::Mat objective(nRows, nCols, CV_64FC1);
+  for (int i=0; i<nRows; i++ ) {
+    for (int j=0; j<nCols; j++) {
+      cv::Point2d c(j,i);
+      double obj = 0;
+      for (int k=0; k<nEl; k++) {
+        if ( gradient.at<double>(k) == 0) continue; 
+        cv::Point2d disp;
+        disp = dispVect[k] - c;
+        double normVal = cv::norm( disp );
+        double objVal = disp.dot(gradVect[k]) * (1/normVal) *
+          (255-grey.at<char>(k));
+        if ( objVal > 0 ) {
+          obj += objVal;
+        }
+      }
+      objective.at<double>(i, j) = obj/nEl;
+    }
+  }
+  // objective = objective.reshape(1, nRows);
+
+  double minVal;
+  double maxVal;
+  cv::Point maxLoc;
+  cv::Mat objectiveAbs;
+  cv::minMaxLoc( objective, &minVal, &maxVal, NULL, &maxLoc);
+
+  cv::convertScaleAbs( objective*(255/maxVal), objectiveAbs );
+  return objectiveAbs;
+}
+
+cv::Mat EyeTrackProcessor::calcGradient( const cv::Mat& im) {
   // Takes input BGR image and calculates gradient after smoothing
   // Remove noise by blurring with Gaussian
   
@@ -118,19 +218,35 @@ void EyeTrackProcessor::calcGradient( cv::Mat im) {
   cv::Sobel(grey, gradV[1], ddepth, 0, 1, ksize, scale, delta, cv::BORDER_DEFAULT);
   cv::merge( gradV, grad); 
 
-  // Convert to 8U1 
-  cv::Mat absGrad;
-  cv::convertScaleAbs(grad, absGrad);
-  cv::Mat gradient;
-  gradient = absGrad.reshape(1, grad.rows*grad.cols);
+  return grad;
+}
 
-  cv::reduce(gradient, gradient, 1, CV_REDUCE_AVG, -1);
-  // cv::addWeighted(absGrad.col(0), 0.5, absGrad.col(1), 0.5, 0, gradient);
-  gradient = gradient.reshape(0, grad.rows);
-  // cv::addWeighted(absGradX, 0.5, absGradY, 0.5, 0, gradient);
-  //std::cout << "Thresholding" << std::endl;
-  //std::cout << gradient.rows << "x" << gradient.cols << std::endl;
-  // std::cout << gradient << std::endl;
+cv::Mat EyeTrackProcessor::calcGradientMagnitude( const cv::Mat& im ) {
+  
+  // Convert gradient to vector of points
+  cv::Mat grad;
+  grad = im.reshape(1, im.rows*im.cols);
+  cv::Mat gradMag(grad.rows, 1, CV_64FC1);
+  std::vector<cv::Point2d> gradPts;
+  for ( int i=0; i<grad.rows; i++) {
+    gradPts.push_back(cv::Point2d(grad.at<double>(i,0), grad.at<double>(i,1)));
+  }
+  for ( int i=0; i<gradPts.size(); ++i ) {
+    auto normVal = cv::norm(gradPts[i]);
+    // gradPt *= (normVal == 0) ? 0 : 1/cv::norm(gradPt);
+    gradMag.at<double>(i) = normVal;
+  }
+  gradMag = gradMag.reshape( 0, im.rows );
+  return gradMag;
+}
+
+cv::Mat EyeTrackProcessor::thresholdGradient( cv::Mat gradMag ) {
+  cv::Mat gradient;
+  double minVal;
+  double maxVal;
+  cv::minMaxLoc( gradMag, &minVal, &maxVal);
+  cv::convertScaleAbs( gradMag*(255/maxVal), gradient );
+  
   if ( useQuantile == 1 ) {
     // Threshold by quantile
     std::vector<int> gradVals;
@@ -147,28 +263,7 @@ void EyeTrackProcessor::calcGradient( cv::Mat im) {
     cv::addWeighted(gradMean,1.0, gradStd, gradThreshStdScale, 0, gradThreshold);
     cv::threshold( gradient, gradient, gradThreshold.val[0], 255, cv::THRESH_TOZERO);
   }
-
-  // Convert gradient to vector of points
-  grad = grad.reshape(1, grad.rows*grad.cols);
-  std::vector<cv::Point2d> gradPts;
-  for ( int i=0; i<grad.rows; i++) {
-    gradPts.push_back(cv::Point2d(grad.at<double>(i,0), grad.at<double>(i,1)));
-  }
-  for ( auto& gradPt : gradPts ) {
-    auto normVal = cv::norm(gradPt);
-    if ( normVal == 0 ) {
-      gradPt *= 0;
-    } else {
-      gradPt *= 1/cv::norm(gradPt);
-    }
-  }
-  
-  cv::Mat dest( gradient.size(), CV_8UC3);
-  //std::cout << "Gradient: " << gradient.channels() << 
-  //            ", Dest: " << dest.channels() << std::endl;
-
-  cv::cvtColor( gradient, dest, CV_GRAY2BGR);
-  dest.copyTo(im);
+  return gradient;
 }
 
 cv::Rect EyeTrackProcessor::getRightEyeRoI( const cv::Mat& imFace ) {
