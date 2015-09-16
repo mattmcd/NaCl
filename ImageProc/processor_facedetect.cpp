@@ -22,9 +22,16 @@ void FaceDetectorProcessor::detectFaces(const cv::Mat im, std::vector<cv::Rect>&
   cv::Mat grey;
   cv::cvtColor( im, grey, CV_BGR2GRAY );
   cv::equalizeHist( grey, grey );
+  cv::Mat grey_small;
+  cv::pyrDown(grey,grey_small);
 
-  face_cascade.detectMultiScale( grey, faces, 1.1, 2, 
+
+  face_cascade.detectMultiScale( grey_small, faces, 1.1, 2, 
       0 | CV_HAAR_SCALE_IMAGE, cv::Size(30,30));
+  for (auto& face : faces ) {
+    face += cv::Point(face.x, face.y);
+    face += cv::Size(face.width, face.height);
+  }
 }
 
 cv::Mat FaceDetectorProcessor::operator()(cv::Mat im) {
