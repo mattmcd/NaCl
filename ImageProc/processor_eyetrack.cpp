@@ -87,8 +87,8 @@ cv::Mat EyeTrackProcessor::operator()(cv::Mat im) {
     drawGradient(imFace(rightEye));
     drawGradient(imFace(leftEye));
     
-    drawBorder(imFace(rightEye));
-    drawBorder(imFace(leftEye));
+    //drawBorder(imFace(rightEye));
+    //drawBorder(imFace(leftEye));
   }
 
   // Display intermediate images for debugging
@@ -109,16 +109,15 @@ void EyeTrackProcessor::drawGradient( cv::Mat im ) {
   objective = calcObjective( im );
   
   
-  double minVal;
   double maxVal;
   cv::Point maxLoc;
   cv::Mat objectiveAbs;
-  cv::minMaxLoc( objective, &minVal, &maxVal, NULL, &maxLoc);
+  cv::minMaxLoc( objective, NULL, &maxVal, NULL, &maxLoc);
 
-  cv::Mat dest( objective.size(), CV_8UC3);
+  //cv::Mat dest( objective.size(), CV_8UC3);
 
-  cv::cvtColor( objective, dest, CV_GRAY2BGR);
-  dest.copyTo(im);
+  //cv::cvtColor( objective, dest, CV_GRAY2BGR);
+  //dest.copyTo(im);
   cv::circle(im, maxLoc, 3, cv::Scalar(0,255,0), -1);
 }
 
@@ -181,7 +180,7 @@ cv::Mat EyeTrackProcessor::calcObjective( cv::Mat im ) {
         double objVal = disp.dot(gradVect[k]) * (1/normVal) *
           (255-grey.at<char>(k));
         if ( objVal > 0 ) {
-          obj += objVal;
+          obj += objVal*objVal;
         }
       }
       objective.at<double>(i, j) = obj/nEl;
@@ -189,11 +188,10 @@ cv::Mat EyeTrackProcessor::calcObjective( cv::Mat im ) {
   }
   // objective = objective.reshape(1, nRows);
 
-  double minVal;
   double maxVal;
   cv::Point maxLoc;
   cv::Mat objectiveAbs;
-  cv::minMaxLoc( objective, &minVal, &maxVal, NULL, &maxLoc);
+  cv::minMaxLoc( objective, NULL, &maxVal, NULL, &maxLoc);
 
   cv::convertScaleAbs( objective*(255/maxVal), objectiveAbs );
   return objectiveAbs;
