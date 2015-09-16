@@ -17,8 +17,8 @@ class EyeTrackProcessor : public Processor {
   private:
     void drawBorder( cv::Mat );
     void calcGradient( cv::Mat );
-    cv::Rect getRightEyeRoI( cv::Mat);
-    cv::Rect getLeftEyeRoI( cv::Mat);
+    cv::Rect getRightEyeRoI( const cv::Mat&);
+    cv::Rect getLeftEyeRoI( const cv::Mat&);
     static void createOutput(cv::Mat&, cv::Mat&);
     // Helper function for debugging
     static void printDim( const std::string&, const cv::Mat&);
@@ -111,31 +111,12 @@ void EyeTrackProcessor::calcGradient( cv::Mat im) {
   
   int scale = 1;
   int delta = 0;
-  int ddepth = CV_16S;
-  cv::Mat grad(grey.size(), CV_8UC2);
+  int ddepth = CV_64F;
+  cv::Mat grad(grey.size(), CV_64FC2);
   std::vector<cv::Mat> gradV(2);
   cv::Sobel(grey, gradV[0], ddepth, 1, 0, ksize, scale, delta, cv::BORDER_DEFAULT);
   cv::Sobel(grey, gradV[1], ddepth, 0, 1, ksize, scale, delta, cv::BORDER_DEFAULT);
   cv::merge( gradV, grad); 
-
-  // Normalized gradient - need to convert to float
-  cv::Mat nGrad;
-  grad.convertTo(nGrad, CV_32FC1);
-  cv::normalize(nGrad, nGrad, 1);
-  printDim( "grad", grad);
-  printDim( "nGrad", nGrad);
-  std::cout << cv::norm( nGrad ) << std::endl;
-  /*
-  cv::Mat nGradNorm; // Check: norm of elements should sum to 1
-  nGrad.copyTo( nGradNorm );
-  nGradNorm = nGradNorm.reshape(1, nGrad.rows*nGrad.cols);
-  cv::pow( nGradNorm, 2, nGradNorm);
-  cv::Mat nGradNormSum;
-  cv::reduce(nGradNorm, nGradNormSum, 1, CV_REDUCE_SUM);
-  cv::sqrt( nGradNormSum, nGradNormSum);
-  nGradNormSum = nGradNormSum.reshape(0, nGrad.rows);
-  std::cout << nGradNormSum << std::endl;
-  */ 
 
   // Convert to 8U1 
   cv::Mat absGrad;
@@ -147,8 +128,8 @@ void EyeTrackProcessor::calcGradient( cv::Mat im) {
   // cv::addWeighted(absGrad.col(0), 0.5, absGrad.col(1), 0.5, 0, gradient);
   gradient = gradient.reshape(0, grad.rows);
   // cv::addWeighted(absGradX, 0.5, absGradY, 0.5, 0, gradient);
-  std::cout << "Thresholding" << std::endl;
-  std::cout << gradient.rows << "x" << gradient.cols << std::endl;
+  //std::cout << "Thresholding" << std::endl;
+  //std::cout << gradient.rows << "x" << gradient.cols << std::endl;
   // std::cout << gradient << std::endl;
   if ( useQuantile == 1 ) {
     // Threshold by quantile
@@ -167,15 +148,30 @@ void EyeTrackProcessor::calcGradient( cv::Mat im) {
     cv::threshold( gradient, gradient, gradThreshold.val[0], 255, cv::THRESH_TOZERO);
   }
 
+  // Convert gradient to vector of points
+  grad = grad.reshape(1, grad.rows*grad.cols);
+  std::vector<cv::Point2d> gradPts;
+  for ( int i=0; i<grad.rows; i++) {
+    gradPts.push_back(cv::Point2d(grad.at<double>(i,0), grad.at<double>(i,1)));
+  }
+  for ( auto& gradPt : gradPts ) {
+    auto normVal = cv::norm(gradPt);
+    if ( normVal == 0 ) {
+      gradPt *= 0;
+    } else {
+      gradPt *= 1/cv::norm(gradPt);
+    }
+  }
+  
   cv::Mat dest( gradient.size(), CV_8UC3);
-  std::cout << "Gradient: " << gradient.channels() << 
-              ", Dest: " << dest.channels() << std::endl;
+  //std::cout << "Gradient: " << gradient.channels() << 
+  //            ", Dest: " << dest.channels() << std::endl;
 
   cv::cvtColor( gradient, dest, CV_GRAY2BGR);
   dest.copyTo(im);
 }
 
-cv::Rect EyeTrackProcessor::getRightEyeRoI( cv::Mat imFace ) {
+cv::Rect EyeTrackProcessor::getRightEyeRoI( const cv::Mat& imFace ) {
     int faceWidth = imFace.cols;
     int faceHeight = imFace.rows;
     int w = std::round( faceWidth * eyeWidth);
@@ -187,15 +183,13 @@ cv::Rect EyeTrackProcessor::getRightEyeRoI( cv::Mat imFace ) {
     return roiRightEye;
 }
 
-cv::Rect EyeTrackProcessor::getLeftEyeRoI( cv::Mat imFace ) {
+cv::Rect EyeTrackProcessor::getLeftEyeRoI( const cv::Mat& imFace ) {
     int faceWidth = imFace.cols;
-    int faceHeight = imFace.rows;
     int w = std::round( faceWidth * eyeWidth);
-    int h = std::round( faceHeight * eyeHeight);
     int x0 = std::round( faceWidth * eyeX0);
-    int y0 = std::round( faceHeight * eyeY0);
     // Person right eye (camera left)
-    cv::Rect roiLeftEye(faceWidth - x0 - w, y0, w, h);
+    cv::Rect roiLeftEye = getRightEyeRoI(imFace);
+    roiLeftEye += cv::Point(faceWidth - 2*x0 - w, 0);
     return roiLeftEye;
 }
 
