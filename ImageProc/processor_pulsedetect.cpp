@@ -53,6 +53,7 @@ cv::Mat PulseDetectionProcessor::operator()(cv::Mat im) {
 }
 
 namespace {
-  auto diffProcReg = ProcessorRegister<PulseDetectionProcessor>("Pulse Detection");
+  auto diffProcReg = ProcessorRegister<
+    PulseDetectionProcessor>("Pulse Detection (experimental)");
 }
 

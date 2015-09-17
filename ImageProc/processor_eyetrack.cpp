@@ -87,8 +87,8 @@ cv::Mat EyeTrackProcessor::operator()(cv::Mat im) {
     drawGradient(imFace(rightEye));
     drawGradient(imFace(leftEye));
     
-    //drawBorder(imFace(rightEye));
-    //drawBorder(imFace(leftEye));
+    drawBorder(imFace(rightEye));
+    drawBorder(imFace(leftEye));
   }
 
   // Display intermediate images for debugging
@@ -104,21 +104,26 @@ void EyeTrackProcessor::drawBorder( cv::Mat im){
 }
 
 void EyeTrackProcessor::drawGradient( cv::Mat im ) {
-  // Calculate mean dot product of displacement vector and gradient
-  cv::Mat objective;
-  objective = calcObjective( im );
-  
-  
-  double maxVal;
-  cv::Point maxLoc;
-  cv::Mat objectiveAbs;
-  cv::minMaxLoc( objective, NULL, &maxVal, NULL, &maxLoc);
+  try {
 
-  //cv::Mat dest( objective.size(), CV_8UC3);
+    // Calculate mean dot product of displacement vector and gradient
+    cv::Mat objective;
+    objective = calcObjective( im );
+    
+    
+    double maxVal;
+    cv::Point maxLoc;
+    cv::Mat objectiveAbs;
+    cv::minMaxLoc( objective, NULL, &maxVal, NULL, &maxLoc);
 
-  //cv::cvtColor( objective, dest, CV_GRAY2BGR);
-  //dest.copyTo(im);
-  cv::circle(im, maxLoc, 3, cv::Scalar(0,255,0), -1);
+    //cv::Mat dest( objective.size(), CV_8UC3);
+
+    //cv::cvtColor( objective, dest, CV_GRAY2BGR);
+    //dest.copyTo(im);
+    cv::circle(im, maxLoc, 3, cv::Scalar(0,255,0), -1);
+  } catch (cv::Exception e) {
+
+  }
 }
 
 cv::Mat EyeTrackProcessor::calcObjective( cv::Mat im ) {
@@ -240,9 +245,8 @@ cv::Mat EyeTrackProcessor::calcGradientMagnitude( const cv::Mat& im ) {
 
 cv::Mat EyeTrackProcessor::thresholdGradient( cv::Mat gradMag ) {
   cv::Mat gradient;
-  double minVal;
   double maxVal;
-  cv::minMaxLoc( gradMag, &minVal, &maxVal);
+  cv::minMaxLoc( gradMag, NULL, &maxVal);
   cv::convertScaleAbs( gradMag*(255/maxVal), gradient );
   
   if ( useQuantile == 1 ) {
@@ -300,5 +304,6 @@ void EyeTrackProcessor::createOutput( cv::Mat& src, cv::Mat& dest )
 }
 
 namespace {
-  auto scProcReg = ProcessorRegister<EyeTrackProcessor>("Eye Tracker");
+  auto scProcReg = ProcessorRegister<
+    EyeTrackProcessor>("Eye Tracker (experimental)");
 }

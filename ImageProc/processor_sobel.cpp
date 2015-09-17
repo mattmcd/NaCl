@@ -31,13 +31,13 @@ cv::Mat SobelProcessor::operator()(cv::Mat im) {
   cv::Sobel(grey, gradY, ddepth, 0, 1, ksize, scale, delta, cv::BORDER_DEFAULT);
 
   // Scaled abs gradients
-  cv::Mat absGradX, absGradY;
-
-  cv::convertScaleAbs(gradX, absGradX);
-  cv::convertScaleAbs(gradY, absGradY);
-
+  cv::Mat gradMag;
+  cv::addWeighted(gradX, 0.5, gradY, 0.5, 0, gradMag);
+  
+  double maxVal;
+  cv::minMaxLoc( gradMag, NULL, &maxVal);
   cv::Mat gradient;
-  cv::addWeighted(absGradX, 0.5, absGradY, 0.5, 0, gradient);
+  cv::convertScaleAbs( gradMag*(255/maxVal), gradient );
 
   // Display intermediate images for debugging
   cv::Mat dest;
