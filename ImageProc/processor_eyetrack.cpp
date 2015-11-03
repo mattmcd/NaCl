@@ -121,8 +121,8 @@ void EyeTrackProcessor::drawGradient( cv::Mat im ) {
     //cv::cvtColor( objective, dest, CV_GRAY2BGR);
     //dest.copyTo(im);
     cv::circle(im, maxLoc, 3, cv::Scalar(0,255,0), -1);
-  } catch (cv::Exception e) {
-
+  } catch (std::exception& e) {
+    std::cout << "Error: " << e.what() << std::endl;
   }
 }
 
