@@ -1,0 +1,70 @@
+# Title: 'Install steps for OpenCV NaCl development on Ubuntu 14.04'
+# Date: 20151104
+# Author: Matt McDonnell (matt@matt-mcdonnell.com)
+# Description: Steps for setting up a development environment for OpenCV
+#   using Google Native Client (NaCl) on a bare Ubuntu 14.04 instance.
+#   Tested on Amazon EC2 using a t2.micro instance running Ubuntu Server
+#   14.04 LTS.  
+#   
+
+# Install packages needed for NaCl SDK and naclports
+# Note that the NaCl SDK uses 32 bit versions of some libraries so these
+# need to be installed as well as the 64 bit versions.  If a particular
+# naclport fails to build check for missing 32 bit library first.
+sudo apt-get update
+sudo apt-get install unzip
+sudo apt-get install glibc
+sudo apt-get install libc6-i386
+sudo apt-get install git
+sudo apt-get install build-essential
+sudo apt-get install lib32stdc++6
+sudo apt-get install cmake
+
+# Create directory structure for external code files (NaCl SDK, etc)
+# This directory structure is a personal preference so feel free to modify
+# (and change the paths in the rest of this script)
+mkdir Work
+mkdir Work/ExternCode
+cd Work/ExternCode/
+
+# Install NaCl SDK
+curl -O https://storage.googleapis.com/nativeclient-mirror/nacl/nacl_sdk/nacl_sdk.zip
+unzip nacl_sdk.zip 
+cd nacl_sdk/
+./naclsdk list
+./naclsdk update
+
+# Install depo-tools needed to install naclports
+cd ~/Work/ExternCode
+git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+
+# Add depot_tools to path and set NACL_SDK_ROOT
+vim ~/.bashrc 
+# Add lines below (without #) to .bashrc, modifying for location and SDK version if necessary
+# export PATH="/home/ubuntu/Work/ExternCode/depot_tools":"$PATH"
+# export NACL_SDK_ROOT="/home/ubuntu/Work/ExternCode/nacl_sdk/pepper_46/"
+exit # Logout and login again to pick up new environment settings
+
+# Install NaCl ports 
+cd Work/ExternCode/
+mkdir naclports
+cd naclports/
+gclient config --name=src https://chromium.googlesource.com/external/naclports.git
+gclient clean
+gclient sync
+cd src/
+# Set up git config with your name and email
+git config --global user.email "user@example.com"
+git config --global user.name "User Name"
+# Make opencv and dependencies (takes about 20 minutes)
+NACL_ARCH=pnacl make opencv
+
+# (optional) Clone my NaCl demos
+cd
+cd Work/
+mkdir Projects
+cd Projects/
+git clone https://github.com/mattmcd/NaCl.git
+cd NaCl/ImageProc/
+make
+make serve # Expose port 8000 and try it out
