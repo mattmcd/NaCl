@@ -31,6 +31,8 @@ only appear if you have a cached page i.e. have previously visited.
 
 Build Setup
 -----------
+UPDATED: Please see setup.txt in parent directory for a step by step setup on a new Ubuntu server.  
+
 There are a few steps needed to configure in order to use OpenCV with NaCl.
 Fortunately, once you become aware of the existence of  [NaCl Ports](https://code.google.com/p/naclports/) 
 they are fairly straight forward.
