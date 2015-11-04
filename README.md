@@ -10,3 +10,8 @@ Development history so far:
 - Simple - found out there are some example files in the distribution 
   that simplify things.  This is why it can be a good idea to read the doc 
   occasionally.
+
+Setup
+-----
+Please see setup.txt for steps needed to install NaCl SDK and naclports on Ubuntu 14.04.  
+This works on Amazon AWS t2.micro instance so should be easy to get up and running.
