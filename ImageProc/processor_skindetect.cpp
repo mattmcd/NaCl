@@ -29,17 +29,12 @@ cv::Mat SkinDetectProcessor::operator()(cv::Mat im) {
   
   // Open image to remove noise
   cv::Mat kernel = cv::getStructuringElement( 
-    cv::MORPH_ELLIPSE, cv::Size(11,11));
+    cv::MORPH_ELLIPSE, cv::Size(3,3));
   cv::Mat skinMask;
   cv::morphologyEx( thresh, skinMask, cv::MORPH_OPEN, 
     kernel, cv::Point(-1,1), 2);
   cv::GaussianBlur(skinMask, skinMask, cv::Size(3,3), 0, 0);
 
-  // Close image to fill in gaps
-  cv::Mat kernel_close = cv::getStructuringElement( 
-    cv::MORPH_ELLIPSE, cv::Size(7,7));
-  cv::morphologyEx( thresh, skinMask, cv::MORPH_CLOSE, 
-    kernel_close, cv::Point(-1,1), 2);
 
   cv::Mat out;
   cv::bitwise_and(im, im, out, skinMask);
