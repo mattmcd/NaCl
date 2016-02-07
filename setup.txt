@@ -18,6 +18,11 @@ sudo apt-get install git
 sudo apt-get install build-essential
 sudo apt-get install lib32stdc++6
 sudo apt-get install cmake
+sudo apt-get install curl
+
+# Install python
+# My preference is to use the Anaconda distribution
+# but apt-get will also work.
 
 # Create directory structure for external code files (NaCl SDK, etc)
 # This directory structure is a personal preference so feel free to modify
@@ -48,7 +53,7 @@ exit # Logout and login again to pick up new environment settings
 cd Work/ExternCode/
 mkdir naclports
 cd naclports/
-gclient config --name=src https://chromium.googlesource.com/external/naclports.git
+gclient config --name=src https://chromium.googlesource.com/webports
 gclient clean
 gclient sync
 cd src/
