@@ -106,7 +106,7 @@ function moduleDidLoad() {
   stream.textContent = stream.value;
   stream.hidden = false;
 
-  var camera = document.getElementById("camera")
+  var camera = document.getElementById("camera");
   camera.hidden = false;
   run.hidden = false;
 }
